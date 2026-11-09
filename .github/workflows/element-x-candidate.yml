@@ -59,7 +59,11 @@ jobs:
             :features:startchat:impl:testDebugUnitTest \
             :features:createroom:impl:testDebugUnitTest \
             :features:invitepeople:impl:testDebugUnitTest \
-            :features:home:impl:testDebugUnitTest
+            :features:home:impl:testDebugUnitTest \
+            --tests "*DefaultStartDMActionTest" \
+            --tests "*ConfigureRoomPresenterTest" \
+            --tests "*DefaultInvitePeoplePresenterTest" \
+            --tests "*RoomListPresenterTest"
       - name: Conserver la preuve du logo utilisé dans la compilation
         run: |
           sha256sum LogoLeFilTalk.png | tee logo-sha256.txt
