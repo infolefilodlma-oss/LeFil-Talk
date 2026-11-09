@@ -9,6 +9,7 @@ on:
       - 'tools/apply_visual_brand.py'
       - 'tools/apply_poppins.py'
       - 'tools/apply_theme_colors.py'
+      - 'tools/apply_optional_encryption.py'
       - 'LogoLeFilTalk.png'
 
 permissions:
@@ -41,6 +42,8 @@ jobs:
         run: |
           python3 -m pip install --user Pillow
           python3 tools/apply_visual_brand.py
+      - name: Régler le chiffrement facultatif sans supprimer E2EE
+        run: python3 tools/apply_optional_encryption.py
       - name: Conserver la preuve du logo utilisé dans la compilation
         run: |
           sha256sum LogoLeFilTalk.png | tee logo-sha256.txt
