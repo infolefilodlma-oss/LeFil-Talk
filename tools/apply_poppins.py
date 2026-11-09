@@ -41,3 +41,12 @@ for path in (tokens, compound):
     source = source.replace("fontFamily = FontFamily.Default", "fontFamily = leFilPoppins")
     path.write_text(source)
 print("Poppins appliquée aux tokens typographiques Compose et Material3, poids 400/500/700.")
+
+# Embarquer aussi la licence OFL dans l'APK qui contient les polices.
+license_source = Path("licenses/Poppins-OFL.txt")
+if not license_source.is_file():
+    raise SystemExit("Licence SIL OFL de Poppins absente du dépôt.")
+license_target = Path("upstream/app/src/main/assets/licenses/Poppins-OFL.txt")
+license_target.parent.mkdir(parents=True, exist_ok=True)
+license_target.write_text(license_source.read_text(encoding="utf-8"), encoding="utf-8")
+print("Licence SIL OFL de Poppins intégrée aux assets de l'application.")
