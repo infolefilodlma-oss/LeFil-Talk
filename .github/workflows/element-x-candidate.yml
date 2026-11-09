@@ -5,6 +5,7 @@ on:
   push:
     paths:
       - '.github/workflows/element-x-candidate.yml'
+      - 'tools/brand_candidate.py'
 
 permissions:
   contents: read
@@ -28,7 +29,9 @@ jobs:
           git clone --depth 1 --branch v26.10.1 https://github.com/element-hq/element-x-android.git upstream
           cd upstream
           git rev-parse HEAD | tee ../upstream-commit.txt
-      - name: Compiler APK F-Droid debug amont - non distribuer
+      - name: Appliquer l'identité Le Fil Talk sans toucher à Matrix
+        run: python3 tools/brand_candidate.py
+      - name: Compiler APK Le Fil Talk debug - non distribuer
         working-directory: upstream
         run: |
           chmod +x gradlew
@@ -40,7 +43,7 @@ jobs:
       - name: Archiver le candidat de diagnostic, non publiable
         uses: actions/upload-artifact@v4
         with:
-          name: element-x-amont-debug-non-publiable
+          name: lefil-talk-debug-non-publiable
           path: |
             upstream/app/build/outputs/apk/fdroid/debug/*.apk
             upstream-commit.txt
