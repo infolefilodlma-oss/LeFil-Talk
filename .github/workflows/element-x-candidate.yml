@@ -59,6 +59,20 @@ jobs:
         run: |
           find upstream/app/build/outputs/apk/fdroid/debug -type f -name '*.apk' -size +0c -print -exec sha256sum {} \; | tee apk-checks.txt
           grep -q '\.apk' apk-checks.txt
+      - name: Contrôler identité et signature de l'APK ARM64
+        shell: bash
+        run: |
+          set -euo pipefail
+          APK="upstream/app/build/outputs/apk/fdroid/debug/app-fdroid-arm64-v8a-debug.apk"
+          test -s "$APK"
+          AAPT="$(find "$ANDROID_HOME/build-tools" -type f -name aapt | sort -V | tail -n 1)"
+          APKSIGNER="$(find "$ANDROID_HOME/build-tools" -type f -name apksigner | sort -V | tail -n 1)"
+          test -x "$AAPT" && test -x "$APKSIGNER"
+          "$AAPT" dump badging "$APK" | grep '^package:' | tee apk-identity.txt
+          grep -q "name='net.lefil.talk.debug'" apk-identity.txt
+          "$APKSIGNER" verify --verbose --print-certs "$APK" > apk-signature.txt
+          grep -q 'Verified using v2 scheme' apk-signature.txt
+          sha256sum "$APK" | tee apk-arm64-sha256.txt
       - name: Archiver APK test ARM64 avant démarrage de l'émulateur
         uses: actions/upload-artifact@v4
         with:
@@ -68,6 +82,9 @@ jobs:
             upstream-commit.txt
             apk-checks.txt
             logo-sha256.txt
+            apk-identity.txt
+            apk-signature.txt
+            apk-arm64-sha256.txt
           if-no-files-found: error
       - name: Installer et démarrer Le Fil Talk sur Android 15 (émulateur)
         uses: reactivecircus/android-emulator-runner@v2
