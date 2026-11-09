@@ -39,6 +39,17 @@ jobs:
         run: |
           python3 -m pip install --user Pillow
           python3 tools/apply_visual_brand.py
+      - name: Conserver la preuve du logo utilisé dans la compilation
+        run: |
+          sha256sum LogoLeFilTalk.png | tee logo-sha256.txt
+          python3 - <<'PY'
+          from PIL import Image
+          im = Image.open("LogoLeFilTalk.png")
+          im.verify()
+          im = Image.open("LogoLeFilTalk.png")
+          assert im.size == (1254, 1254), f"Logo inattendu: {im.size}"
+          print("Logo officiel PNG 1254 x 1254 vérifié")
+          PY
       - name: Compiler APK Le Fil Talk debug - non distribuer
         working-directory: upstream
         run: |
@@ -56,6 +67,7 @@ jobs:
             upstream/app/build/outputs/apk/fdroid/debug/app-fdroid-arm64-v8a-debug.apk
             upstream-commit.txt
             apk-checks.txt
+            logo-sha256.txt
           if-no-files-found: error
       - name: Installer et démarrer Le Fil Talk sur Android 15 (émulateur)
         uses: reactivecircus/android-emulator-runner@v2
