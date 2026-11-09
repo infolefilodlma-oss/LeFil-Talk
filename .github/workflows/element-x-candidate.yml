@@ -7,6 +7,7 @@ on:
       - '.github/workflows/element-x-candidate.yml'
       - 'tools/brand_candidate.py'
       - 'tools/apply_visual_brand.py'
+      - 'tools/apply_poppins.py'
       - 'LogoLeFilTalk.png'
 
 permissions:
@@ -39,6 +40,8 @@ jobs:
         run: |
           python3 -m pip install --user Pillow
           python3 tools/apply_visual_brand.py
+      - name: Intégrer Poppins à la typographie native Element X
+        run: python3 tools/apply_poppins.py
       - name: Conserver la preuve du logo utilisé dans la compilation
         run: |
           sha256sum LogoLeFilTalk.png | tee logo-sha256.txt
