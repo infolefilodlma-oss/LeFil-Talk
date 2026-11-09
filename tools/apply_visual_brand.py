@@ -44,6 +44,19 @@ for density,size in densities.items():
     foreground.alpha_composite(fitted,((size_fg[0]-fitted.width)//2,(size_fg[1]-fitted.height)//2))
     foreground.save(fg,"WEBP",lossless=True,method=6)
 
+# Android 8+ utilise le fond vectoriel de l'icone adaptative, et non le raster.
+# Modifier les trois variantes pour garder le meme fond opaque.
+for variant in ("debug", "nightly", "release"):
+    background = root / "appicon/element/src" / variant / "res/drawable/ic_launcher_background.xml"
+    if not background.is_file():
+        raise SystemExit(f"Fond adaptatif absent : {background}")
+    source = background.read_text(encoding="utf-8")
+    import re
+    updated, count = re.subn(r'(android:fillColor=")#[0-9A-Fa-f]{6,8}(")', r'\\g<1>#0C1853\\g<2>', source)
+    if count != 1:
+        raise SystemExit(f"Fond adaptatif inattendu : {background}")
+    background.write_text(updated, encoding="utf-8")
+
 # Onboarding : point d'extension amont, utilise si la ressource existe.
 onboard=root/"features/login/impl/src/main/res/drawable-nodpi/onboarding_logo.png"
 onboard.parent.mkdir(parents=True,exist_ok=True)
