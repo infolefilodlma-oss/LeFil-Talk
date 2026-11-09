@@ -42,9 +42,19 @@ if "room.enableEncryption()" not in security_source or "SecurityAndPrivacyEvent.
 # Ne pas demander de clé de récupération tant qu'aucune conversation chiffrée n'existe.
 room_list = "features/home/impl/src/main/kotlin/io/element/android/features/home/impl/roomlist/RoomListPresenter.kt"
 replace_once(
+    "features/home/impl/src/main/kotlin/io/element/android/features/home/impl/datasource/RoomListDataSource.kt",
+    "    val roomSummariesFlow: Flow<ImmutableList<RoomListRoomSummary>> = _roomSummariesFlow\n",
+    "    val roomSummariesFlow: Flow<ImmutableList<RoomListRoomSummary>> = _roomSummariesFlow\n"
+    "    val rawRoomSummariesFlow: Flow<List<RoomSummary>> = roomList.summaries\n",
+)
+replace_once(
     room_list,
     "        val securityBannerState by rememberSecurityBannerState(securityBannerDismissed)\n",
-    "            val hasEncryptedRooms = roomSummaries.dataOrNull().orEmpty().any { it.info.isEncrypted == true }\n"
+    "        val hasEncryptedRooms by produceState(false) {\n"
+    "            roomListDataSource.rawRoomSummariesFlow.collect { summaries ->\n"
+    "                value = summaries.any { summary -> summary.info.isEncrypted == true }\n"
+    "            }\n"
+    "        }\n"
     "            val securityBannerState by rememberSecurityBannerState(securityBannerDismissed, hasEncryptedRooms)\n",
 )
 replace_once(
