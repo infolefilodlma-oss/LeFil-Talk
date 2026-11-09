@@ -10,6 +10,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -37,7 +40,7 @@ private val Bubble = Color(0xFFEEF6FF)
 
 @Composable
 private fun TalkVisualPreview() {
-    MaterialTheme(typography = Typography(defaultFontFamily = Poppins)) {
+    CompositionLocalProvider(LocalTextStyle provides TextStyle(fontFamily = Poppins)) {
     Column(Modifier.width(390.dp).height(820.dp).background(Canvas)) {
         Row(
             Modifier.fillMaxWidth().height(64.dp)
