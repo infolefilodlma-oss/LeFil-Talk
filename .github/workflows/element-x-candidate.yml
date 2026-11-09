@@ -1,0 +1,48 @@
+name: Element X - diagnostic compilation Android
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/element-x-candidate.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  compile:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    steps:
+      - name: Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: SDK Android
+        uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+      - name: Checkout Element X Android - source identifiée
+        run: |
+          git clone --depth 1 --branch v26.10.1 https://github.com/element-hq/element-x-android.git upstream
+          cd upstream
+          git rev-parse HEAD | tee ../upstream-commit.txt
+      - name: Compiler APK F-Droid debug amont - non distribuer
+        working-directory: upstream
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon :app:assembleFdroidDebug
+      - name: Vérifier artefact et empreinte
+        run: |
+          find upstream/app/build/outputs/apk/fdroid/debug -type f -name '*.apk' -size +0c -print -exec sha256sum {} \; | tee apk-checks.txt
+          grep -q '\.apk' apk-checks.txt
+      - name: Archiver le candidat de diagnostic, non publiable
+        uses: actions/upload-artifact@v4
+        with:
+          name: element-x-amont-debug-non-publiable
+          path: |
+            upstream/app/build/outputs/apk/fdroid/debug/*.apk
+            upstream-commit.txt
+            apk-checks.txt
+          if-no-files-found: error
