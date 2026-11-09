@@ -28,14 +28,16 @@ for filename, mappings in changes.items():
     import_anchor = "import io.element.android.compound.annotations.CoreColorToken"
     if source.count(import_anchor) != 1:
         raise SystemExit(f"Version Element X inattendue : {path}")
-    source = source.replace(import_anchor, "import androidx.compose.ui.graphics.Color\\n" + import_anchor)
+    source = source.replace(import_anchor, "import androidx.compose.ui.graphics.Color" + chr(10) + import_anchor)
+    lines = source.splitlines()
     for key, argb in mappings.items():
-        import re
-        pattern = rf"(?m)^(    {re.escape(key)} = )[^,\\n]+(,)$"
-        replacement = rf"\\g<1>Color({argb})\\2"
-        updated, count = re.subn(pattern, replacement, source)
-        if count != 1:
+        matches = [i for i, line in enumerate(lines) if line.startswith(f"    {key} = ")]
+        if len(matches) != 1:
             raise SystemExit(f"Jeton sémantique introuvable/ambigu : {filename} {key}")
-        source = updated
+        i = matches[0]
+        if not lines[i].endswith(","):
+            raise SystemExit(f"Syntaxe de jeton inattendue : {filename} {key}")
+        lines[i] = f"    {key} = Color({argb}),"
+    source = chr(10).join(lines) + chr(10)
     path.write_text(source, encoding="utf-8")
     print(f"{filename} : {len(mappings)} couleurs du Fil appliquées.")
