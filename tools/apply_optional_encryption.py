@@ -43,7 +43,7 @@ if "room.enableEncryption()" not in security_source or "SecurityAndPrivacyEvent.
 room_list = "features/home/impl/src/main/kotlin/io/element/android/features/home/impl/roomlist/RoomListPresenter.kt"
 replace_once(
     room_list,
-    "            val securityBannerState by rememberSecurityBannerState(securityBannerDismissed)\n",
+    "        val securityBannerState by rememberSecurityBannerState(securityBannerDismissed)\n",
     "            val hasEncryptedRooms = roomSummaries.dataOrNull().orEmpty().any { it.info.isEncrypted == true }\n"
     "            val securityBannerState by rememberSecurityBannerState(securityBannerDismissed, hasEncryptedRooms)\n",
 )
