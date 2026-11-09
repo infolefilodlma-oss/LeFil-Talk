@@ -42,6 +42,22 @@ jobs:
         run: |
           find upstream/app/build/outputs/apk/fdroid/debug -type f -name '*.apk' -size +0c -print -exec sha256sum {} \; | tee apk-checks.txt
           grep -q '\.apk' apk-checks.txt
+      - name: Installer et démarrer Le Fil Talk sur Android 15 (émulateur)
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: default
+          arch: x86_64
+          profile: pixel_2
+          disable-animations: true
+          script: |
+            APK=$(find upstream/app/build/outputs/apk/fdroid/debug -type f -name '*universal*.apk' | head -n 1)
+            test -n "$APK"
+            adb install -r "$APK"
+            adb shell pm path net.lefil.talk | grep -q package:
+            adb shell monkey -p net.lefil.talk 1
+            sleep 10
+            adb shell pidof net.lefil.talk
       - name: Archiver le candidat de diagnostic, non publiable
         uses: actions/upload-artifact@v4
         with:
