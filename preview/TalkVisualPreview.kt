@@ -1,5 +1,10 @@
 package net.lefil.talk.preview
 
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import net.lefil.talk.preview.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -18,9 +23,13 @@ import androidx.compose.ui.unit.sp
  * Atelier de validation VISUELLE uniquement. Aucun écran Matrix ni navigation modifié.
  * Ouvrir ce fichier dans Android Studio (module Compose avec ui-tooling-preview),
  * puis cliquer sur Split / Design pour afficher @Preview sans compiler l'APK complet.
- * Le logo officiel et Poppins doivent être vérifiés sur la vraie application :
- * cette prévisualisation emploie des libellés de substitution, pas ces actifs.
+ * Logo officiel et Poppins chargés depuis les ressources de l'atelier, via prepare_preview.py.
  */
+private val Poppins = FontFamily(
+    Font(R.font.poppins_regular, FontWeight.Normal),
+    Font(R.font.poppins_medium, FontWeight.Medium),
+    Font(R.font.poppins_bold, FontWeight.Bold)
+)
 private val Prune = Color(0xFF4A0050)
 private val BlueNight = Color(0xFF10066B)
 private val Canvas = Color(0xFFF8F6FB)
@@ -28,6 +37,7 @@ private val Bubble = Color(0xFFEEF6FF)
 
 @Composable
 private fun TalkVisualPreview() {
+    MaterialTheme(typography = Typography(defaultFontFamily = Poppins)) {
     Column(Modifier.width(390.dp).height(820.dp).background(Canvas)) {
         Row(
             Modifier.fillMaxWidth().height(64.dp)
@@ -36,7 +46,7 @@ private fun TalkVisualPreview() {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text("Le Fil Talk", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+            Image(painterResource(R.drawable.lefil_talk_logo), contentDescription = "Le Fil Talk", modifier = Modifier.size(54.dp))
             Text("← Le Fil", color = Color.White, fontSize = 13.sp)
         }
         Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically,
@@ -68,6 +78,7 @@ private fun TalkVisualPreview() {
                 Text("Profil")
             }
         }
+    }
     }
 }
 
