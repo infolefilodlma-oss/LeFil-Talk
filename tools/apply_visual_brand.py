@@ -5,7 +5,7 @@ from PIL import Image
 import hashlib
 
 root=Path("upstream")
-logo_path=Path("assets/LogoLeFilTalk.png")
+logo_path=Path("LogoLeFilTalk.png")
 if not logo_path.is_file():
     raise SystemExit(f"Logo officiel absent : {logo_path}. Aucun autre logo ne sera utilisé.")
 raw=logo_path.read_bytes()
