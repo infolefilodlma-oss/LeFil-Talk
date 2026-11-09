@@ -42,6 +42,15 @@ jobs:
         run: |
           find upstream/app/build/outputs/apk/fdroid/debug -type f -name '*.apk' -size +0c -print -exec sha256sum {} \; | tee apk-checks.txt
           grep -q '\.apk' apk-checks.txt
+      - name: Archiver APK test ARM64 avant démarrage de l'émulateur
+        uses: actions/upload-artifact@v4
+        with:
+          name: lefil-talk-arm64-test-non-publiable
+          path: |
+            upstream/app/build/outputs/apk/fdroid/debug/app-fdroid-arm64-v8a-debug.apk
+            upstream-commit.txt
+            apk-checks.txt
+          if-no-files-found: error
       - name: Installer et démarrer Le Fil Talk sur Android 15 (émulateur)
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -56,12 +65,3 @@ jobs:
             adb shell monkey -p net.lefil.talk 1
             sleep 10
             adb shell pidof net.lefil.talk
-      - name: Archiver le candidat de diagnostic, non publiable
-        uses: actions/upload-artifact@v4
-        with:
-          name: lefil-talk-debug-non-publiable
-          path: |
-            upstream/app/build/outputs/apk/fdroid/debug/*.apk
-            upstream-commit.txt
-            apk-checks.txt
-          if-no-files-found: error
