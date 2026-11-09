@@ -1,0 +1,64 @@
+name: Publier ZIP Le Fil Talk pour les adherents
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/talk-zip-release.yml'
+permissions:
+  contents: write
+  actions: read
+jobs:
+  zip-release:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Recuperer APK existant, sans recompilation
+        uses: actions/download-artifact@v4
+        with:
+          name: lefil-talk-arm64-test-non-publiable
+          run-id: 42585044629
+          github-token: ${{ github.token }}
+          path: artifact
+      - name: Verifier et creer ZIP
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib,zipfile
+          from pathlib import Path
+          src=Path("artifact/upstream/app/build/outputs/apk/fdroid/debug/app-fdroid-arm64-v8a-debug.apk")
+          assert src.is_file() and src.stat().st_size>10000000
+          b=src.read_bytes()
+          digest=hashlib.sha256(b).hexdigest()
+          assert any(digest in line and "app-fdroid-arm64-v8a-debug.apk" in line for line in Path("artifact/apk-checks.txt").read_text().splitlines())
+          assert zipfile.is_zipfile(src)
+          with zipfile.ZipFile(src) as z:
+              assert z.testzip() is None and "AndroidManifest.xml" in z.namelist()
+          note=("LE FIL TALK - VERSION D'ESSAI - ANDROID ARM64\n\n"
+                "1. Decompressez le ZIP et ouvrez Le-Fil-Talk.apk sur votre telephone Android.\n"
+                "2. Android peut demander l'autorisation d'installer cette application.\n"
+                "3. Ouvrez Le Fil Talk et choisissez le serveur matrix.org.\n"
+                "4. Creez gratuitement votre compte si vous n'en avez pas encore, ou connectez-vous.\n"
+                "5. Pour discuter, partagez votre identifiant Matrix avec un autre membre.\n\n"
+                "IMPORTANT : version de test, non encore validee sur un telephone reel.\n"
+                "Aucune distribution sur F-Droid n'est encore effective.\n"
+                "SHA-256 APK : "+digest+"\n")
+          out=Path("Le-Fil-Talk-Android-ARM64-ESSAI.zip")
+          with zipfile.ZipFile(out,"w",compression=zipfile.ZIP_DEFLATED,compresslevel=6) as z:
+              z.writestr("Le-Fil-Talk.apk",b)
+              z.writestr("LIRE-AVANT-INSTALLATION.txt",note.encode())
+          with zipfile.ZipFile(out) as z:
+              assert z.testzip() is None and hashlib.sha256(z.read("Le-Fil-Talk.apk")).hexdigest()==digest
+          print("ZIP verifie:",out.stat().st_size,"octets, APK SHA256:",digest)
+          PY
+      - name: Ajouter le ZIP a la publication GitHub deja existante
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          tag="lefil-talk-essai-20261109"
+          gh release view "$tag" >/dev/null
+          gh release upload "$tag" Le-Fil-Talk-Android-ARM64-ESSAI.zip
+          gh release view "$tag" --json assets
