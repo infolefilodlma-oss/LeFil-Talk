@@ -16,12 +16,12 @@ jobs:
           GH_REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
-          tag="lefil-talk-marque-essai-20261109"
-          gh release download "$tag" --pattern 'Le-Fil-Talk-Android-ARM64-MARQUE-ESSAI.zip'
+          tag="lefil-talk-inscription-essai-20261109"
+          gh release download "$tag" --pattern 'Le-Fil-Talk-Android-ARM64-INSCRIPTION-ESSAI.zip'
           python3 - <<'PY'
           import hashlib,zipfile
           from pathlib import Path
-          z=Path("Le-Fil-Talk-Android-ARM64-MARQUE-ESSAI.zip")
+          z=Path("Le-Fil-Talk-Android-ARM64-INSCRIPTION-ESSAI.zip")
           with zipfile.ZipFile(z) as f:
               assert f.testzip() is None
               apk=f.read("Le-Fil-Talk.apk")
@@ -31,7 +31,7 @@ jobs:
               assert digest in text
               with zipfile.ZipFile(__import__("io").BytesIO(apk)) as inner:
                   assert "AndroidManifest.xml" in inner.namelist() and inner.testzip() is None
-          Path("Le-Fil-Talk-Android-ARM64-MARQUE-ESSAI.apk").write_bytes(apk)
+          Path("Le-Fil-Talk-Android-ARM64-INSCRIPTION-ESSAI.apk").write_bytes(apk)
           print("APK valide, sha256:",digest)
           PY
-          gh release upload "$tag" Le-Fil-Talk-Android-ARM64-MARQUE-ESSAI.apk --clobber
+          gh release upload "$tag" Le-Fil-Talk-Android-ARM64-INSCRIPTION-ESSAI.apk --clobber
