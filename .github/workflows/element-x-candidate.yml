@@ -10,6 +10,7 @@ on:
       - 'tools/apply_poppins.py'
       - 'tools/apply_theme_colors.py'
       - 'tools/apply_optional_encryption.py'
+      - 'tools/apply_signup_help.py'
       - 'LogoLeFilTalk.png'
 
 permissions:
@@ -44,6 +45,21 @@ jobs:
           python3 tools/apply_visual_brand.py
       - name: Régler le chiffrement facultatif sans supprimer E2EE
         run: python3 tools/apply_optional_encryption.py
+      - name: Aider l'inscription sans remplacer les écrans natifs
+        run: python3 tools/apply_signup_help.py
+      - name: Appliquer Poppins et la palette claire du Fil
+        run: |
+          python3 tools/apply_poppins.py
+          python3 tools/apply_theme_colors.py
+      - name: Tester les parcours natifs touchés
+        working-directory: upstream
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon \
+            :features:startchat:impl:testDebugUnitTest \
+            :features:createroom:impl:testDebugUnitTest \
+            :features:invitepeople:impl:testDebugUnitTest \
+            :features:home:impl:testDebugUnitTest
       - name: Conserver la preuve du logo utilisé dans la compilation
         run: |
           sha256sum LogoLeFilTalk.png | tee logo-sha256.txt
