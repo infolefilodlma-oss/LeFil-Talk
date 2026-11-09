@@ -75,16 +75,16 @@ jobs:
         working-directory: upstream
         run: |
           chmod +x gradlew
-          ./gradlew --no-daemon :app:assembleFdroidDebug
+          ./gradlew --no-daemon :app:assembleGplayDebug
       - name: Vérifier artefact et empreinte
         run: |
-          find upstream/app/build/outputs/apk/fdroid/debug -type f -name '*.apk' -size +0c -print -exec sha256sum {} \; | tee apk-checks.txt
+          find upstream/app/build/outputs/apk/gplay/debug -type f -name '*.apk' -size +0c -print -exec sha256sum {} \; | tee apk-checks.txt
           grep -q '\.apk' apk-checks.txt
       - name: Contrôler identité et signature de l'APK ARM64
         shell: bash
         run: |
           set -euo pipefail
-          APK="upstream/app/build/outputs/apk/fdroid/debug/app-fdroid-arm64-v8a-debug.apk"
+          APK="upstream/app/build/outputs/apk/gplay/debug/app-gplay-arm64-v8a-debug.apk"
           test -s "$APK"
           AAPT="$(find "$ANDROID_HOME/build-tools" -type f -name aapt | sort -V | tail -n 1)"
           APKSIGNER="$(find "$ANDROID_HOME/build-tools" -type f -name apksigner | sort -V | tail -n 1)"
@@ -97,9 +97,9 @@ jobs:
       - name: Archiver APK test ARM64 avant démarrage de l'émulateur
         uses: actions/upload-artifact@v4
         with:
-          name: lefil-talk-arm64-test-non-publiable
+          name: lefil-talk-gplay-arm64-test-non-publiable
           path: |
-            upstream/app/build/outputs/apk/fdroid/debug/app-fdroid-arm64-v8a-debug.apk
+            upstream/app/build/outputs/apk/gplay/debug/app-gplay-arm64-v8a-debug.apk
             upstream-commit.txt
             apk-checks.txt
             logo-sha256.txt
@@ -116,7 +116,7 @@ jobs:
           profile: pixel_2
           disable-animations: true
           script: |
-            adb install -r upstream/app/build/outputs/apk/fdroid/debug/app-fdroid-x86_64-debug.apk
+            adb install -r upstream/app/build/outputs/apk/gplay/debug/app-gplay-x86_64-debug.apk
             adb shell pm path net.lefil.talk.debug | grep -q package:
             adb shell monkey -p net.lefil.talk.debug 1
             sleep 10
