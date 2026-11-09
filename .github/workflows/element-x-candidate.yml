@@ -111,6 +111,13 @@ jobs:
             adb pull /sdcard/lefil-talk-start.png lefil-talk-ui-proof/startup-android15.png
             adb shell uiautomator dump /sdcard/lefil-talk-ui.xml
             adb pull /sdcard/lefil-talk-ui.xml lefil-talk-ui-proof/startup-hierarchy.xml
+            # Ne jamais valider une capture d'une boite d'erreur Android comme preuve de l'interface.
+            if grep -Eqi "System UI isn't responding|isn't responding|Close app|ne répond pas" lefil-talk-ui-proof/startup-hierarchy.xml; then
+              echo "::error::Emulateur non fonctionnel (ANR) : capture invalide, ne pas certifier l'interface."
+              exit 1
+            fi
+            adb shell pidof net.lefil.talk.debug >/dev/null || { echo "::error::Application absente"; exit 1; }
+            echo "Capture Android sans dialogue ANR detecte (pas de validation des ecrans connectes)."
       - name: Archiver preuves visuelles Android 15
         if: always()
         uses: actions/upload-artifact@v4
