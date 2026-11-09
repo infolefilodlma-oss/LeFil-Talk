@@ -2,24 +2,21 @@
 """Branding Le Fil Talk : ressources Android uniquement, sans changer Matrix."""
 from pathlib import Path
 from PIL import Image
-import io
-import urllib.request
+import hashlib
 
 root=Path("upstream")
-logo_url="https://talk.le-fil.net/uploads/lefil-talk/LeFil.Talk.transparent.png"
-request=urllib.request.Request(logo_url,headers={"User-Agent":"LeFil-Talk-Android-build/1.0"})
-with urllib.request.urlopen(request,timeout=25) as response:
-    raw=response.read(5_000_001)
-if len(raw)>5_000_000 or not raw.startswith(b"\x89PNG\r\n\x1a\n"):
-    raise SystemExit("Logo officiel indisponible ou invalide, abandon du build.")
-img=Image.open(io.BytesIO(raw)).convert("RGBA")
-if min(img.size)<100:
-    raise SystemExit("Logo source trop petit, abandon du build.")
-bbox=img.getbbox()
-if not bbox:
-    raise SystemExit("Logo transparent vide")
-img=img.crop(bbox)
-print("Logo source valide",img.size,"depuis",logo_url)
+logo_path=Path("assets/LogoLeFilTalk.png")
+if not logo_path.is_file():
+    raise SystemExit(f"Logo officiel absent : {logo_path}. Aucun autre logo ne sera utilisé.")
+raw=logo_path.read_bytes()
+if len(raw)>5_000_000 or not raw.startswith(bytes.fromhex("89504e470d0a1a0a")):
+    raise SystemExit("Logo officiel invalide ou trop volumineux.")
+img=Image.open(logo_path)
+img.verify()
+img=Image.open(logo_path).convert("RGBA")
+if img.size != (1254,1254):
+    raise SystemExit(f"Dimensions du logo officiel inattendues : {img.size}")
+print("Logo officiel vérifié",logo_path,hashlib.sha256(raw).hexdigest())
 
 # Icones du lanceur : remplacer uniquement les images raster de l'icone Element.
 # Conserver les XML adaptatifs, la structure de l'application et ses mecanismes de login.
@@ -31,9 +28,9 @@ for density,size in densities.items():
         dest=folder/name
         if not dest.exists():
             raise SystemExit(f"Ressource amont inattendue : {dest}")
-        canvas=Image.new("RGBA",(size,size),"#4A0050")
+        canvas=Image.new("RGBA",(size,size),(0,0,0,0))
         fitted=img.copy()
-        fitted.thumbnail((round(size*.78),round(size*.78)),Image.Resampling.LANCZOS)
+        fitted.thumbnail((round(size*.98),round(size*.98)),Image.Resampling.LANCZOS)
         canvas.alpha_composite(fitted,((size-fitted.width)//2,(size-fitted.height)//2))
         canvas.save(dest,"WEBP",lossless=True,method=6)
     # L'icone adaptative foreground est une ressource distincte.
