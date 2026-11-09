@@ -19,7 +19,7 @@ for weight, name in [(400, "Regular"), (500, "Medium"), (700, "Bold")]:
     url = f"https://raw.githubusercontent.com/google/fonts/main/ofl/poppins/Poppins-{name}.ttf"
     with urlopen(Request(url, headers={"User-Agent": "LeFil-Talk-CI"}), timeout=30) as response:
         data = response.read(1_000_001)
-    if not 10_000 < len(data) < 1_000_000 or data[:4] not in (b"\\x00\\x01\\x00\\x00", b"OTTO"):
+    if not 10_000 < len(data) < 1_000_000 or data[:4] not in (bytes.fromhex("00010000"), b"OTTO"):
         raise SystemExit(f"Fichier de police non valide : {name}")
     (fonts / f"poppins_{name.lower()}.ttf").write_bytes(data)
 
