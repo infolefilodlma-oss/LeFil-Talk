@@ -1,6 +1,6 @@
 # Le Fil Talk Android — référence graphique et garde-fous
 
-Date : 2026-11-09. Statut : périmètre graphique minimal décidé par l'utilisateur, non implémenté.
+Date : 2026-11-09. Statut : logo intégré au build de diagnostic ; personnalisation native étendue demandée le 09/11/2026, à implémenter et tester.
 
 ## Référence utilisateur
 Capture d'écran fournie le 09/11/2026 de l'interface Talk intégrée à l'Atrium (interface web de messagerie). La capture constitue la **référence d'identité visuelle**, et non un plan d'architecture ou une demande de recopier le DOM web dans Element X.
@@ -9,8 +9,8 @@ Capture d'écran fournie le 09/11/2026 de l'interface Talk intégrée à l'Atriu
 
 ## Décision utilisateur du 09/11/2026 — périmètre strict
 **Priorité 1 : logo Le Fil Talk existant et couleur de marque.**
-**Priorité 2, facultative : police Poppins uniquement si son intégration native est simple et maintenable.**
-**Ne pas reproduire les bulles, fonds, navigation, arrondis, bandeau ou mise en page de l'interface web Atrium.**
+**Priorité 2 : intégrer Poppins si compatible avec les ressources de police Android natives ; en cas d'incompatibilité, documenter la preuve technique et conserver une police lisible.**
+**Adapter également, lorsque l'architecture Element X le permet sans régression, les couleurs, fonds, bulles, arrondis, espacements et écrans d'accueil. Ne pas recopier littéralement le DOM web Atrium ni remplacer les mécanismes natifs Matrix.**
 La capture et le HTML de l'Atrium sont une référence pour identifier les couleurs, pas un cahier des charges de refonte Android.
 
 ## Couleurs relevées dans le HTML fourni
@@ -29,11 +29,11 @@ Ces valeurs proviennent des variables CSS de l'interface Talk fournie, et ne son
 ## Contraintes de maintenance
 1. Inspecter d'abord les ressources de logo, couleur de marque et éventuellement typographie de la version Element X Android épinglée. Favoriser les ressources prévues par l'amont.
 2. Éviter le fork profond des écrans de conversation, de connexion, du SDK Matrix et des composants de navigation.
-3. Limiter les adaptations au logo et à la couleur de marque. Poppins seulement si son intégration ne crée pas de maintenance disproportionnée. L'aide d'inscription est un chantier fonctionnel distinct.
+3. Personnaliser progressivement le thème natif (logo, couleurs, typographie Poppins, fonds, bulles et espacements) via les points d'extension réels d'Element X, sans fork profond ni régression. L'aide d'inscription reste un chantier fonctionnel distinct.
 4. Vérifier les licences et l'intégration de la police Poppins et des actifs graphiques.
 5. Prévoir contraste clair/sombre, accessibilité, grands caractères, affichage petit écran et claviers ouverts.
 6. Avant/après : captures et tests ciblés de connexion, conversations, envoi/réception, liste des contacts, notifications et retour navigateur ; rollback du patch si régression.
-7. Ne pas annoncer que l'APK actuel reflète cette identité : **aucune adaptation graphique démontrée à ce stade**.
+7. Le logo a été intégré dans la compilation de diagnostic réussie ; **la police Poppins, le thème complet, la mise en page et les captures avant/après ne sont pas encore validés**.
 
 ## Prochaine action
 Examiner les ressources de logo et de couleur de Element X v26.10.1 ; adapter uniquement ces deux éléments, puis envisager Poppins si triviale. Vérifier par compilation et capture d'écran Android.
