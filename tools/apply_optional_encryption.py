@@ -97,18 +97,12 @@ if test_source.count(old) != 1:
     raise SystemExit(f"Test RoomListPresenter inattendu: premier scénario ({test_source.count(old)} occurrences).")
 test_source = test_source.replace(old, new, 1)
 # The incomplete-backup banner test also needs an encrypted room to justify the prompt.
-anchor = """        val roomListService = FakeRoomListService(
-            createRoomListLambda = { roomList }
-        )
+anchor = """        val syncService = FakeSyncService(initialSyncState = SyncState.Running)
         val presenter = createRoomListPresenter(
-            client = FakeMatrixClient(roomListService = roomListService, encryptionService = encryptionService, syncService = syncService),
 """
-replacement = """        val roomListService = FakeRoomListService(
-            createRoomListLambda = { roomList }
-        )
+replacement = """        val syncService = FakeSyncService(initialSyncState = SyncState.Running)
         roomList.summaries.emit(listOf(aRoomSummary(isEncrypted = true)))
         val presenter = createRoomListPresenter(
-            client = FakeMatrixClient(roomListService = roomListService, encryptionService = encryptionService, syncService = syncService),
 """
 if test_source.count(anchor) != 1:
     raise SystemExit("Test de confirmation de clé introuvable ou ambigu.")
