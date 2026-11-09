@@ -8,6 +8,7 @@ on:
       - 'tools/brand_candidate.py'
       - 'tools/apply_visual_brand.py'
       - 'tools/apply_poppins.py'
+      - 'tools/apply_theme_colors.py'
       - 'LogoLeFilTalk.png'
 
 permissions:
@@ -42,6 +43,8 @@ jobs:
           python3 tools/apply_visual_brand.py
       - name: Intégrer Poppins à la typographie native Element X
         run: python3 tools/apply_poppins.py
+      - name: Appliquer les couleurs natives Le Fil Talk (clair/sombre)
+        run: python3 tools/apply_theme_colors.py
       - name: Conserver la preuve du logo utilisé dans la compilation
         run: |
           sha256sum LogoLeFilTalk.png | tee logo-sha256.txt
