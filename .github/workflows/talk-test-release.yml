@@ -1,0 +1,58 @@
+name: Publier APK Le Fil Talk de test en telechargement direct
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/talk-test-release.yml'
+permissions:
+  contents: write
+  actions: read
+jobs:
+  publish-test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Recuperer la compilation ARM64 existante (aucune recompilation)
+        uses: actions/download-artifact@v4
+        with:
+          name: lefil-talk-arm64-test-non-publiable
+          run-id: 42585044629
+          github-token: ${{ github.token }}
+          path: artifact
+      - name: Controler empreinte, chemin et integrite de l'APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s artifact/upstream/app/build/outputs/apk/fdroid/debug/app-fdroid-arm64-v8a-debug.apk
+          sha256sum artifact/upstream/app/build/outputs/apk/fdroid/debug/app-fdroid-arm64-v8a-debug.apk
+          python3 - <<'PY'
+          from pathlib import Path
+          import zipfile,hashlib,re
+          f=Path("artifact/upstream/app/build/outputs/apk/fdroid/debug/app-fdroid-arm64-v8a-debug.apk")
+          assert zipfile.is_zipfile(f),"APK is not zip-format"
+          with zipfile.ZipFile(f) as z:
+              assert z.testzip() is None,"APK invalid"
+              assert "AndroidManifest.xml" in z.namelist(),"manifest missing"
+          log=Path("artifact/apk-checks.txt").read_text()
+          digest=hashlib.sha256(f.read_bytes()).hexdigest()
+          assert any(digest in line and "app-fdroid-arm64-v8a-debug.apk" in line for line in log.splitlines()),"build hash mismatch"
+          print("APK valide ; SHA256 =",digest,"; octets =",f.stat().st_size)
+          PY
+          cp artifact/upstream/app/build/outputs/apk/fdroid/debug/app-fdroid-arm64-v8a-debug.apk Le-Fil-Talk-Android-ARM64-ESSAI.apk
+      - name: Publier un lien GitHub public durable, version d'essai UNIQUEMENT
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          tag="lefil-talk-essai-20261109"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "Une release existe deja, ne pas ecraser sans controle"
+            exit 1
+          fi
+          gh release create "$tag" Le-Fil-Talk-Android-ARM64-ESSAI.apk \
+            --title "Le Fil Talk — Android ARM64 — ESSAI (Element X)" \
+            --notes "Application experimentalement personnalisee sur Element X Android v26.10.1. Compilation ARM64 debug, non signee pour publication officielle. Utilisable uniquement comme test sur Android ARM64. Un compte et un serveur Matrix sont necessaires pour communiquer. Installation et connexion aux services Le Fil non validees sur telephone. Pour un usage de production, attendre une version signee definitivement. Aucun compte Matrix n'est fourni par cet APK." \
+            --prerelease --latest=false
+          gh release view "$tag" --json url,assets
