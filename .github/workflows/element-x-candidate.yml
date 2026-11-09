@@ -33,6 +33,24 @@ jobs:
           git rev-parse HEAD | tee ../upstream-commit.txt
       - name: Appliquer l'identité Le Fil Talk sans toucher à Matrix
         run: python3 tools/brand_candidate.py
+      - name: Vérifier les préconditions des notifications Matrix
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          config = Path("upstream/plugins/src/main/kotlin/config/BuildTimeConfig.kt").read_text()
+          service = Path("upstream/libraries/push/impl/src/main/kotlin/io/element/android/libraries/push/impl/DefaultPushService.kt").read_text()
+          gradle = Path("upstream/app/build.gradle.kts").read_text()
+          checks = {
+              "UnifiedPush inclus": 'const val PUSH_CONFIG_INCLUDE_UNIFIED_PUSH: Boolean = true' in config,
+              "Vérification de session requise": 'SessionVerifiedStatus.Verified' in service,
+              "Échec explicite sans distributeur": 'NoDistributorsAvailable()' in service,
+              "Identifiant debug explicite": 'applicationIdSuffix = ".debug"' in gradle,
+          }
+          for label, ok in checks.items():
+              print(f"{label}: {'OK' if ok else 'ÉCHEC'}")
+          if not all(checks.values()):
+              raise SystemExit("Préconditions notifications modifiées : examiner avant livraison")
+          PY
       - name: Compiler APK Le Fil Talk debug - non distribuer
         working-directory: upstream
         run: |
