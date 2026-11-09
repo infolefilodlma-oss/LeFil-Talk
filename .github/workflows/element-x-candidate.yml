@@ -107,13 +107,20 @@ jobs:
             adb pull /sdcard/lefil-talk-start.png lefil-talk-ui-proof/startup-android15.png
             adb shell uiautomator dump /sdcard/lefil-talk-ui.xml
             adb pull /sdcard/lefil-talk-ui.xml lefil-talk-ui-proof/startup-hierarchy.xml
-            # Ne jamais valider une capture d'une boite d'erreur Android comme preuve de l'interface.
-            if grep -Eqi "System UI isn't responding|isn't responding|Close app|ne répond pas" lefil-talk-ui-proof/startup-hierarchy.xml; then
-              echo "::error::Emulateur non fonctionnel (ANR) : capture invalide, ne pas certifier l'interface."
-              exit 1
-            fi
-            adb shell pidof net.lefil.talk.debug >/dev/null || { echo "::error::Application absente"; exit 1; }
-            echo "Capture Android sans dialogue ANR detecte (pas de validation des ecrans connectes)."
+            adb shell dumpsys activity activities > lefil-talk-ui-proof/activity-state.txt
+            adb logcat -d -t 5000 > lefil-talk-ui-proof/logcat-startup.txt
+            # Refuser tout dialogue ANR et exiger une preuve que l'écran Talk est visible.
+            python3 - <<'PY'
+            from pathlib import Path
+            hierarchy = Path("lefil-talk-ui-proof/startup-hierarchy.xml").read_text(errors="replace")
+            activity = Path("lefil-talk-ui-proof/activity-state.txt").read_text(errors="replace")
+            if any(term in hierarchy.lower() for term in ("isn't responding", "is not responding", "close app", "ne répond pas")):
+                raise SystemExit("ANR Android détecté : capture invalide, APK non certifiée.")
+            if "net.lefil.talk.debug" not in hierarchy and "net.lefil.talk.debug" not in activity:
+                raise SystemExit("L'écran Le Fil Talk n'est pas confirmé au premier plan.")
+            print("Écran de l'application détecté, sans dialogue ANR.")
+            PY
+            adb shell pidof net.lefil.talk.debug >/dev/null
       - name: Archiver preuves visuelles Android 15
         if: always()
         uses: actions/upload-artifact@v4
