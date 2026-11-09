@@ -1,0 +1,62 @@
+name: Le Fil Talk — APK identite visuelle
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/apply_visual_brand.py'
+      - '.github/workflows/talk-brand-apk.yml'
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+      - name: Recuperer Element X version epinglee
+        run: git clone --depth 1 --branch v26.10.1 https://github.com/element-hq/element-x-android.git upstream
+      - name: Appliquer marque et identite, sans modifier Matrix
+        run: |
+          python3 -m pip install --user Pillow==11.3.0
+          python3 tools/brand_candidate.py
+          python3 tools/apply_visual_brand.py
+      - name: Compiler ARM64
+        working-directory: upstream
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon :app:assembleFdroidDebug
+      - name: Verifier, empaqueter et publier ZIP public de test
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib,zipfile
+          from pathlib import Path
+          src=Path("upstream/app/build/outputs/apk/fdroid/debug/app-fdroid-arm64-v8a-debug.apk")
+          assert src.is_file() and src.stat().st_size>10000000
+          with zipfile.ZipFile(src) as z:
+              assert z.testzip() is None and "AndroidManifest.xml" in z.namelist()
+          digest=hashlib.sha256(src.read_bytes()).hexdigest()
+          out=Path("Le-Fil-Talk-Android-ARM64-MARQUE-ESSAI.zip")
+          with zipfile.ZipFile(out,"w",zipfile.ZIP_DEFLATED,compresslevel=6) as z:
+              z.write(src,"Le-Fil-Talk.apk")
+              z.writestr("LIRE-AVANT-INSTALLATION.txt","Le Fil Talk - Android ARM64 - VERSION D'ESSAI\nLogo Le Fil Talk et violet de marque.\nInscription gratuite sur matrix.org depuis l'application.\nApplication de test non validee sur telephone reel.\nSHA256 APK : "+digest+"\n")
+          with zipfile.ZipFile(out) as z:
+              assert z.testzip() is None and hashlib.sha256(z.read("Le-Fil-Talk.apk")).hexdigest()==digest
+          print("APK et ZIP verifies, sha256:",digest)
+          PY
+          tag="lefil-talk-marque-essai-20261109"
+          gh release create "$tag" Le-Fil-Talk-Android-ARM64-MARQUE-ESSAI.zip \
+            --title "Le Fil Talk — logo et violet — essai Android" \
+            --notes "Version de test ARM64 avec logo existant Le Fil Talk et violet #4A0050. Application Element X v26.10.1, pas de changement de Matrix. Non validee sur telephone reel, non publiable en production." \
+            --prerelease --latest=false
