@@ -1,0 +1,37 @@
+name: Publier APK direct Le Fil Talk
+on:
+  workflow_run:
+    workflows: ["Le Fil Talk — APK identite visuelle"]
+    types: [completed]
+permissions:
+  contents: write
+jobs:
+  publish:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Telecharger ZIP valide et publier APK direct
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          tag="lefil-talk-marque-essai-20261109"
+          gh release download "$tag" --pattern 'Le-Fil-Talk-Android-ARM64-MARQUE-ESSAI.zip'
+          python3 - <<'PY'
+          import hashlib,zipfile
+          from pathlib import Path
+          z=Path("Le-Fil-Talk-Android-ARM64-MARQUE-ESSAI.zip")
+          with zipfile.ZipFile(z) as f:
+              assert f.testzip() is None
+              apk=f.read("Le-Fil-Talk.apk")
+              assert len(apk)>10_000_000
+              text=f.read("LIRE-AVANT-INSTALLATION.txt").decode()
+              digest=hashlib.sha256(apk).hexdigest()
+              assert digest in text
+              with zipfile.ZipFile(__import__("io").BytesIO(apk)) as inner:
+                  assert "AndroidManifest.xml" in inner.namelist() and inner.testzip() is None
+          Path("Le-Fil-Talk-Android-ARM64-MARQUE-ESSAI.apk").write_bytes(apk)
+          print("APK valide, sha256:",digest)
+          PY
+          gh release upload "$tag" Le-Fil-Talk-Android-ARM64-MARQUE-ESSAI.apk --clobber
