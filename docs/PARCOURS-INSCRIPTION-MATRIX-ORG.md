@@ -1,5 +1,5 @@
 # Le Fil Talk — inscription simple, sans dette technique
-Date : 2026-11-09. Statut : spécification validée sur le principe, **non implémentée**.
+Date : 2026-11-09. Statut : parcours natif conservé ; simplification du chiffrement et aide d'inscription en cours d'intégration et de validation.
 
 ## Distinction fondamentale
 - **Nom d'utilisateur Matrix** : choisi à l'inscription, par exemple `marie.dupont`. Sur matrix.org, l'identifiant Matrix complet est `@marie.dupont:matrix.org`. Ce n'est **pas** une adresse e-mail.
@@ -16,7 +16,9 @@ Pour discuter avec les membres du Fil, vous avez besoin d'un compte de messageri
 2. Choisissez un **nom d'utilisateur** (par exemple `marie.dupont`). **Ce n'est pas votre adresse e-mail.**
 3. Choisissez un **mot de passe** et conservez-le.
 4. Si matrix.org le demande, indiquez et confirmez votre **adresse e-mail**.
-5. Revenez dans Le Fil Talk et connectez-vous avec votre nouveau compte.\n6. Dans les réglages de sécurité du compte, activez la **sauvegarde sécurisée des messages chiffrés** si elle est proposée, et conservez la **clé de récupération** dans un endroit sûr.
+5. Revenez dans Le Fil Talk et connectez-vous avec votre nouveau compte.
+
+Aucune configuration du chiffrement ni clé de récupération n'est demandée pour commencer. Les nouvelles conversations privées sont non chiffrées par défaut. Chaque adhérent peut activer le chiffrement plus tard, conversation par conversation, depuis ses paramètres de sécurité. L'explication de la sauvegarde et de la récupération des clés n'intervient qu'à ce moment.
 
 Votre adresse Matrix sera de la forme `@marie.dupont:matrix.org`. Vous pourrez la partager avec les autres adhérents pour qu'ils vous trouvent.
 
@@ -38,5 +40,8 @@ Votre adresse Matrix sera de la forme `@marie.dupont:matrix.org`. Vous pourrez l
 6. **Avant publication** : tester de bout en bout sur téléphone réel : premier lancement, inscription, confirmation e-mail si demandée, retour, connexion, déconnexion, reconnexion, ajout d'un contact, message envoyé/reçu, fermeture/réouverture. Tester aussi « déjà un compte », « mot de passe oublié », récupération par e-mail vérifié, sauvegarde des messages chiffrés, erreur réseau et nom déjà pris.
 7. Ne pas présenter l'inscription comme réalisée tant qu'un test réel ne l'a pas démontrée.
 
-## Point technique à résoudre avant modification
-Inspecter la version source exacte `element-x-android v26.10.1` et le flux d'authentification matrix.org pour identifier le point d'extension officiellement supporté. **Ne pas coder le popup à l'aveugle.**
+## Vérifications techniques établies
+- Dans `element-x-android v26.10.1`, `matrix.org` est le fournisseur par défaut lorsqu'aucun serveur n'a été choisi auparavant ; le serveur reste modifiable.
+- Le chiffrement est une propriété de chaque salon. Element X conserve un réglage natif permettant d'activer le chiffrement d'un salon non chiffré lorsque les permissions Matrix l'autorisent.
+- L'activation du chiffrement est irréversible pour le salon ; elle protège les messages futurs, pas rétroactivement les anciens messages.
+- Les invites de sauvegarde de récupération sont différées jusqu'à l'existence d'au moins une conversation chiffrée dans la personnalisation Le Fil Talk. Ce comportement reste à confirmer par les tests automatisés et sur téléphone réel.
