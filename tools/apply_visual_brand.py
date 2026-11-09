@@ -28,7 +28,7 @@ for density,size in densities.items():
         dest=folder/name
         if not dest.exists():
             raise SystemExit(f"Ressource amont inattendue : {dest}")
-        canvas=Image.new("RGBA",(size,size),(0,0,0,0))
+        canvas=Image.new("RGBA",(size,size),(12,24,83,255))
         fitted=img.copy()
         fitted.thumbnail((round(size*.98),round(size*.98)),Image.Resampling.LANCZOS)
         canvas.alpha_composite(fitted,((size-fitted.width)//2,(size-fitted.height)//2))
@@ -59,4 +59,4 @@ needle='<color name="splashscreen_bg_light">#FFFFFFFF</color>'
 if s.count(needle)!=1:
     raise SystemExit("Source amont inattendue pour couleur de lancement")
 colors.write_text(s.replace(needle,'<color name="splashscreen_bg_light">#FF4A0050</color>'))
-print("Identite Le Fil Talk : logo officiel, icones, onboarding et violet #4A0050.")
+print("Identite Le Fil Talk : logo officiel, icones raster opaques bleu profond #0C1853, onboarding et violet #4A0050.")
