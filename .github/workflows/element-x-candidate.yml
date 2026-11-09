@@ -6,6 +6,8 @@ on:
     paths:
       - '.github/workflows/element-x-candidate.yml'
       - 'tools/brand_candidate.py'
+      - 'tools/apply_visual_brand.py'
+      - 'LogoLeFilTalk.png'
 
 permissions:
   contents: read
@@ -33,6 +35,10 @@ jobs:
           git rev-parse HEAD | tee ../upstream-commit.txt
       - name: Appliquer l'identité Le Fil Talk sans toucher à Matrix
         run: python3 tools/brand_candidate.py
+      - name: Vérifier le logo officiel et appliquer les ressources Android
+        run: |
+          python3 -m pip install --user Pillow
+          python3 tools/apply_visual_brand.py
       - name: Compiler APK Le Fil Talk debug - non distribuer
         working-directory: upstream
         run: |
