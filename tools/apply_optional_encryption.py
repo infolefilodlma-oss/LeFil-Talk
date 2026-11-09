@@ -59,6 +59,17 @@ replace_once(
 )
 replace_once(
     room_list,
+    "        val currentSecurityBannerDismissed by rememberUpdatedState(securityBannerDismissed)\n",
+    "        val currentSecurityBannerDismissed by rememberUpdatedState(securityBannerDismissed)\n"
+    "        val currentHasEncryptedRooms by rememberUpdatedState(hasEncryptedRooms)\n",
+)
+replace_once(
+    room_list,
+    "                    hasEncryptedRooms = hasEncryptedRooms,\n",
+    "                    hasEncryptedRooms = currentHasEncryptedRooms,\n",
+)
+replace_once(
+    room_list,
     "    private fun calculateBannerState(\n        securityBannerDismissed: Boolean,\n        recoveryState: RecoveryState,\n    ): SecurityBannerState {\n        if (securityBannerDismissed) {",
     "    private fun calculateBannerState(\n        securityBannerDismissed: Boolean,\n        recoveryState: RecoveryState,\n        hasEncryptedRooms: Boolean,\n    ): SecurityBannerState {\n        if (securityBannerDismissed || !hasEncryptedRooms) {",
 )
