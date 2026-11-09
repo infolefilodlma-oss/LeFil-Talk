@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Palette Le Fil Talk dans les couleurs sémantiques Compose, sans modifier Matrix."""
+"""Couleurs de la capture Le Fil Talk, mode clair, sans modifier Matrix."""
 from pathlib import Path
 
 root = Path("upstream/libraries/compound/src/main/kotlin/io/element/android/compound/tokens/generated")
@@ -13,12 +13,6 @@ changes = {
         "bgAccentPressed": "0xFF26002C",
         "bgAccentSubtle": "0xFFF3EAF5",
         "bgCanvasDefault": "0xFFF8F6FB",
-    },
-    "SemanticColorsDark.kt": {
-        "bgAccentRest": "0xFFF3B9FA",
-        "bgAccentHovered": "0xFFFFCDFD",
-        "bgAccentPressed": "0xFFE5A4F0",
-        "bgAccentSubtle": "0xFF45234A",
     },
 }
 for filename, mappings in changes.items():
