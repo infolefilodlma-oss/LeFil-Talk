@@ -35,3 +35,24 @@ for filename, mappings in changes.items():
     source = chr(10).join(lines) + chr(10)
     path.write_text(source, encoding="utf-8")
     print(f"{filename} : {len(mappings)} couleurs du Fil appliquées.")
+
+# Le Fil Talk démarre en thème clair. Le choix explicite de l'adhérent
+# (clair, sombre ou système) reste ensuite conservé.
+preferences = Path("upstream/libraries/preferences/impl/src/main/kotlin/io/element/android/libraries/preferences/impl/store/DefaultAppPreferencesStore.kt")
+source = preferences.read_text(encoding="utf-8")
+old = """    override fun getThemeFlow(): Flow<String?> {
+        return store.data.map { prefs ->
+            prefs[themeKey]
+        }
+    }
+"""
+new = """    override fun getThemeFlow(): Flow<String?> {
+        return store.data.map { prefs ->
+            prefs[themeKey] ?: "Light"
+        }
+    }
+"""
+if source.count(old) != 1:
+    raise SystemExit("Source amont inattendue pour le thème clair par défaut.")
+preferences.write_text(source.replace(old, new, 1), encoding="utf-8")
+print("Thème clair par défaut ; le choix clair/sombre/système reste modifiable.")
