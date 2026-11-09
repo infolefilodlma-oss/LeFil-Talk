@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'tools/apply_visual_brand.py'
+      - 'tools/apply_signup_help.py'
       - '.github/workflows/talk-brand-apk.yml'
 permissions:
   contents: write
@@ -28,6 +29,7 @@ jobs:
           python3 -m pip install --user Pillow==11.3.0
           python3 tools/brand_candidate.py
           python3 tools/apply_visual_brand.py
+          python3 tools/apply_signup_help.py
       - name: Compiler ARM64
         working-directory: upstream
         run: |
@@ -47,16 +49,16 @@ jobs:
           with zipfile.ZipFile(src) as z:
               assert z.testzip() is None and "AndroidManifest.xml" in z.namelist()
           digest=hashlib.sha256(src.read_bytes()).hexdigest()
-          out=Path("Le-Fil-Talk-Android-ARM64-MARQUE-ESSAI.zip")
+          out=Path("Le-Fil-Talk-Android-ARM64-INSCRIPTION-ESSAI.zip")
           with zipfile.ZipFile(out,"w",zipfile.ZIP_DEFLATED,compresslevel=6) as z:
               z.write(src,"Le-Fil-Talk.apk")
-              z.writestr("LIRE-AVANT-INSTALLATION.txt","Le Fil Talk - Android ARM64 - VERSION D'ESSAI\nLogo Le Fil Talk et violet de marque.\nInscription gratuite sur matrix.org depuis l'application.\nApplication de test non validee sur telephone reel.\nSHA256 APK : "+digest+"\n")
+              z.writestr("LIRE-AVANT-INSTALLATION.txt","Le Fil Talk - Android ARM64 - VERSION D'ESSAI\nLogo Le Fil Talk, violet de marque et aide a l'inscription matrix.org.\nInscription gratuite sur matrix.org depuis l'application.\nApplication de test non validee sur telephone reel.\nSHA256 APK : "+digest+"\n")
           with zipfile.ZipFile(out) as z:
               assert z.testzip() is None and hashlib.sha256(z.read("Le-Fil-Talk.apk")).hexdigest()==digest
           print("APK et ZIP verifies, sha256:",digest)
           PY
-          tag="lefil-talk-marque-essai-20261109"
-          gh release create "$tag" Le-Fil-Talk-Android-ARM64-MARQUE-ESSAI.zip \
-            --title "Le Fil Talk — logo et violet — essai Android" \
-            --notes "Version de test ARM64 avec logo existant Le Fil Talk et violet #4A0050. Application Element X v26.10.1, pas de changement de Matrix. Non validee sur telephone reel, non publiable en production." \
+          tag="lefil-talk-inscription-essai-20261109"
+          gh release create "$tag" Le-Fil-Talk-Android-ARM64-INSCRIPTION-ESSAI.zip \
+            --title "Le Fil Talk — logo, violet et inscription — essai Android" \
+            --notes "Version de test ARM64 avec logo Le Fil Talk, violet #4A0050 et aide a l'inscription matrix.org. Application Element X v26.10.1, pas de changement de Matrix. Non validee sur telephone reel, non publiable en production." \
             --prerelease --latest=false
