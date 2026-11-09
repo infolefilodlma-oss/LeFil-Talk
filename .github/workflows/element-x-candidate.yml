@@ -51,9 +51,7 @@ jobs:
           profile: pixel_2
           disable-animations: true
           script: |
-            APK=$(find upstream/app/build/outputs/apk/fdroid/debug -type f -name '*universal*.apk' | head -n 1)
-            test -n "$APK"
-            adb install -r "$APK"
+            adb install -r upstream/app/build/outputs/apk/fdroid/debug/app-fdroid-x86_64-debug.apk
             adb shell pm path net.lefil.talk | grep -q package:
             adb shell monkey -p net.lefil.talk 1
             sleep 10
