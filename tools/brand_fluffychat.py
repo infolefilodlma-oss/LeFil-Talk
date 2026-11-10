@@ -30,8 +30,8 @@ change("lib/config/setting_keys.dart",
 # Accueil: supprimer la publicité technique Matrix et l'anglais de l'écran initial.
 # Conserver les boutons et les parcours natifs de connexion et inscription.
 change("lib/pages/intro/intro_page.dart",
-       "Text(L10n.of(context).appSubtitle,",
-       "Text('Se relier malgré la distance et la dispersion',")
+       "L10n.of(context).appSubtitle,",
+       "'Se relier malgré la distance et la dispersion',")
 change("lib/pages/intro/intro_page.dart",
        "welcomeText ?? L10n.of(context).appDescription,",
        "welcomeText ?? 'Bienvenue sur Le Fil Talk. Retrouvez vos discussions, vos groupes et vos amis.',")
