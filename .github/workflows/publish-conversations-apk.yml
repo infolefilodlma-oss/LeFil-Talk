@@ -1,0 +1,39 @@
+name: Publier APK Conversations testé (sans recompiler)
+on:
+  push:
+    branches: [conversations-apk]
+    paths: ['.github/workflows/publish-conversations-apk.yml']
+permissions:
+  contents: write
+  actions: read
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Télécharger l'APK déjà compilé et vérifié
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          gh run download 42768045065 --repo "$GH_REPO" -n lefil-talk-conversations-essai-android -D result
+          test -s result/Le-Fil-Talk-Conversations-ESSAI.apk
+          test "$(stat -c%s result/Le-Fil-Talk-Conversations-ESSAI.apk)" -gt 10000000
+          sha="$(awk '{print $1}' result/sha256.txt)"
+          echo "$sha  result/Le-Fil-Talk-Conversations-ESSAI.apk" | sha256sum -c -
+          grep -q "name='net.lefil.conversations'" result/identity.txt
+          grep -q "application-label:'Le Fil Talk'" result/identity.txt
+          grep -q 'Verified using v2 scheme' result/signature.txt
+      - name: Rendre la version d'essai directement téléchargeable
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          tag=lefil-talk-conversations-essai-20261110
+          gh release create "$tag" result/Le-Fil-Talk-Conversations-ESSAI.apk \
+            --target "$GITHUB_SHA" \
+            --title "Le Fil Talk — Conversations — APK Android d'essai" \
+            --notes "APK de test fondée sur Conversations XMPP. Logo Le Fil Talk, nom et paquet indépendant net.lefil.conversations. Compilation et signature debug vérifiées ; pas encore validée sur téléphone réel. Ne pas distribuer comme version de production. Serveur Prosody non installé." \
+            --prerelease --latest=false
+          gh release view "$tag" --json assets --jq '.assets[].name' | grep -Fx 'Le-Fil-Talk-Conversations-ESSAI.apk'
