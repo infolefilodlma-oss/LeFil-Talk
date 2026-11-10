@@ -106,7 +106,7 @@ private fun LeFilNavigation(
 private fun HomeFloatingActionButton(""")
 anchor = "                            state = state.homeSpacesState,"
 assert s.count(anchor) == 1, "HomeSpacesView state anchor absent"
-s = s.replace(anchor, anchor + "\\n                            leFilSection = leFilSpaceSection,")
+s = s.replace(anchor, anchor + "\n                            leFilSection = leFilSpaceSection,")
 assert s.count('private fun LeFilNavigation(') == 1
 assert s.count('RoomListContentView(') >= 1
 assert s.count('HomeSpacesView(') >= 1
