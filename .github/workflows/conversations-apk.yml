@@ -1,0 +1,95 @@
+name: Conversations — APK Le Fil Talk (essai isolé)
+
+on:
+  push:
+    branches: [conversations-apk]
+    paths: ['.github/workflows/conversations-apk.yml', 'LogoLeFilTalk.png']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  android:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    steps:
+      - name: Sources du Fil et logo existant
+        uses: actions/checkout@v4
+      - name: Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Android SDK
+        uses: android-actions/setup-android@v3
+      - name: Source officielle Conversations
+        run: |
+          set -euo pipefail
+          git clone --depth 1 https://codeberg.org/iNPUTmice/Conversations.git upstream
+          git -C upstream rev-parse HEAD | tee conversations-source-sha.txt
+      - name: Logo, nom et identifiant propres à la version d'essai
+        run: |
+          python3 -m pip install --user Pillow==11.3.0
+          python3 - <<'PY'
+          from pathlib import Path
+          from PIL import Image,ImageOps
+          import re
+          root=Path("upstream")
+          gradle=root/"build.gradle"
+          assert gradle.is_file(), "Fichier Gradle amont non trouvé"
+          source=gradle.read_text()
+          # Conserver le code et les fonctions XMPP. Ne modifier que l'identité du paquet.
+          matches=list(re.finditer(r'(?m)^(\s*applicationId\s*(?:=\s*)?["\'])eu\.siacs\.conversations(["\'])',source))
+          assert len(matches)==1, "Format applicationId inconnu : arrêt sans changement"
+          source=source[:matches[0].start()]+matches[0].group(1)+"net.lefil.conversations"+matches[0].group(2)+source[matches[0].end():]
+          gradle.write_text(source)
+          strings=list((root/"src").rglob("values/strings.xml"))
+          assert strings, "Ressources de texte absentes"
+          changed=0
+          for file in strings:
+              s=file.read_text()
+              newer,n=re.subn(r'(<string\s+name="app_name"[^>]*>).*?(</string>)',r'\g<1>Le Fil Talk\g<2>',s,flags=re.S)
+              if n:
+                  file.write_text(newer);changed+=1
+          assert changed, "app_name introuvable"
+          image=Image.open("LogoLeFilTalk.png").convert("RGBA")
+          assert image.width>=256 and image.height>=256, "Logo trop petit"
+          targets=list((root/"src").rglob("mipmap-*/ic_launcher.png"))
+          targets+=list((root/"src").rglob("mipmap-*/ic_launcher_round.png"))
+          assert targets, "Icônes Android introuvables"
+          for target in targets:
+              density=target.parent.name
+              sizes={"mipmap-mdpi":48,"mipmap-hdpi":72,"mipmap-xhdpi":96,"mipmap-xxhdpi":144,"mipmap-xxxhdpi":192}
+              size=sizes.get(density,192)
+              icon=ImageOps.fit(image,(size,size),method=Image.Resampling.LANCZOS)
+              icon.save(target)
+          print(f"Identité Le Fil Talk: {changed} chaînes, {len(targets)} icônes")
+          PY
+      - name: Compiler la version libre sans changement XMPP
+        working-directory: upstream
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon assembleConversationsFreeDebug
+      - name: Contrôler le résultat et réunir les preuves
+        run: |
+          set -euo pipefail
+          find upstream/build/outputs/apk -type f -name '*.apk' -size +100000c -print | tee apks.txt
+          test -s apks.txt
+          APK="$(head -n 1 apks.txt)"
+          AAPT="$(find "$ANDROID_HOME/build-tools" -name aapt -type f | sort -V | tail -1)"
+          APKSIGNER="$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -1)"
+          "$AAPT" dump badging "$APK" | grep -E "^package:|^application-label:" | tee identity.txt
+          grep -q "name='net.lefil.conversations'" identity.txt
+          "$APKSIGNER" verify --verbose --print-certs "$APK" > signature.txt
+          sha256sum "$APK" | tee sha256.txt
+          mkdir -p result
+          cp "$APK" result/Le-Fil-Talk-Conversations-ESSAI.apk
+          cp sha256.txt identity.txt signature.txt conversations-source-sha.txt result/
+      - name: APK téléchargeable et rapports de vérification
+        uses: actions/upload-artifact@v4
+        with:
+          name: lefil-talk-conversations-essai-android
+          path: result/
+          if-no-files-found: error
+          retention-days: 14
