@@ -20,7 +20,7 @@ assert s.count(anchor)==1
 s=s.replace(anchor,anchor+"""import io.element.android.libraries.designsystem.theme.components.Text
 import io.element.android.libraries.designsystem.theme.components.Button
 """)
-anchor="    val appBarState = rememberTopAppBarState()\\n"
+anchor="    val appBarState = rememberTopAppBarState()\n"
 assert s.count(anchor)==1
 s=s.replace(anchor, """    var leFilSpaceSection by remember { mutableStateOf<String?>(null) }
 """+anchor)
@@ -104,6 +104,9 @@ private fun LeFilNavigation(
 
 @Composable
 private fun HomeFloatingActionButton(""")
+anchor = "                        HomeSpacesView(\\n                            state = state.homeSpacesState,"
+assert s.count(anchor) == 1, "HomeSpacesView anchor absent"
+s = s.replace(anchor, anchor + "\\n                            leFilSection = leFilSpaceSection,")
 assert s.count('private fun LeFilNavigation(') == 1
 assert s.count('RoomListContentView(') >= 1
 assert s.count('HomeSpacesView(') >= 1
