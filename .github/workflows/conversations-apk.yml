@@ -35,7 +35,7 @@ jobs:
           python3 -m pip install --user Pillow==11.3.0
           python3 - <<'PY'
           from pathlib import Path
-          from PIL import Image,ImageOps
+          from PIL import Image,ImageOps,ImageDraw,ImageChops
           import re
           root=Path("upstream")
           gradle=root/"build.gradle"
@@ -75,7 +75,14 @@ jobs:
           for folder,size in sizes.items():
               dest=root/"src/main/res"/folder/"lefil_launcher.png"
               dest.parent.mkdir(parents=True,exist_ok=True)
-              ImageOps.fit(image,(size,size),method=Image.Resampling.LANCZOS).save(dest)
+              high=size*4
+              fitted=ImageOps.fit(image,(high,high),method=Image.Resampling.LANCZOS)
+              mask=Image.new("L",(high,high),0)
+              ImageDraw.Draw(mask).ellipse((0,0,high-1,high-1),fill=255)
+              fitted.putalpha(ImageChops.multiply(fitted.getchannel("A"),mask))
+              rounded=fitted.resize((size,size),Image.Resampling.LANCZOS)
+              assert rounded.getpixel((0,0))[3]==0
+              rounded.save(dest)
           print(f"Marque Le Fil Talk: {n} paramètres de nom, {len(sizes)} logos et manifeste modifié")
 
       - name: Compiler la version libre sans changement XMPP
