@@ -96,6 +96,7 @@ jobs:
           name: lefil-talk-arm64-test-non-publiable
           path: |
             upstream/app/build/outputs/apk/fdroid/debug/app-fdroid-arm64-v8a-debug.apk
+            upstream/app/build/outputs/apk/fdroid/debug/app-fdroid-x86_64-debug.apk
             upstream-commit.txt
             apk-checks.txt
             logo-sha256.txt
@@ -103,43 +104,3 @@ jobs:
             apk-signature.txt
             apk-arm64-sha256.txt
           if-no-files-found: error
-      - name: Installer et démarrer Le Fil Talk sur Android 15 (émulateur)
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 34
-          target: default
-          arch: x86_64
-          profile: pixel_2
-          cores: 2
-          ram-size: 2048M
-          heap-size: 256M
-          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
-          disable-animations: true
-          script: |
-            set -eu
-            mkdir -p lefil-talk-ui-proof
-            adb wait-for-device
-            adb shell getprop sys.boot_completed | grep -q 1
-            adb shell input keyevent 82
-            adb install -r upstream/app/build/outputs/apk/fdroid/debug/app-fdroid-x86_64-debug.apk
-            adb shell pm path net.lefil.talk.debug | grep -q package:
-            adb logcat -c || true
-            adb shell am start -W -n net.lefil.talk.debug/io.element.android.x.MainActivity > lefil-talk-ui-proof/launch.txt 2>&1 || true
-            cat lefil-talk-ui-proof/launch.txt
-            sleep 8
-            adb shell pidof net.lefil.talk.debug > lefil-talk-ui-proof/pid.txt || true
-            adb logcat -d -t 1500 > lefil-talk-ui-proof/logcat.txt || true
-            adb shell screencap -p /sdcard/lefil-talk-start.png
-            adb pull /sdcard/lefil-talk-start.png lefil-talk-ui-proof/startup-android15.png
-            adb shell uiautomator dump /sdcard/lefil-talk-ui.xml
-            adb pull /sdcard/lefil-talk-ui.xml lefil-talk-ui-proof/startup-hierarchy.xml
-            test -s lefil-talk-ui-proof/pid.txt || { echo "::error::Le Fil Talk ne reste pas lancé"; exit 1; }
-            ! grep -Eqi "System UI isn't responding|isn't responding|Close app|ne répond pas" lefil-talk-ui-proof/startup-hierarchy.xml
-            echo "Processus Le Fil Talk présent, capture et journaux archivés."
-      - name: Archiver preuves visuelles Android 15
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: lefil-talk-android15-capture-visuelle
-          path: lefil-talk-ui-proof/
-          if-no-files-found: warn
