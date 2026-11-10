@@ -82,7 +82,6 @@ jobs:
           set -euo pipefail
           TAG="lefil-talk-fluffychat-test-20261110"
           APK="Le-Fil-Talk-FluffyChat-test.apk"
-          cp Le-Fil-Talk-FluffyChat-test.apk "$APK"
           test -s "$APK"
           if gh release view "$TAG" --repo "${{ github.repository }}" >/dev/null 2>&1; then
             gh release upload "$TAG" "$APK" --repo "${{ github.repository }}" --clobber
