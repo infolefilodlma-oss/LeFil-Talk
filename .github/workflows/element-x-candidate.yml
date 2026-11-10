@@ -147,6 +147,13 @@ jobs:
         with:
           name: lefil-talk-arm64-test-non-publiable
           path: artefact
+      - name: Vérifier et autoriser KVM avant émulation
+        run: |
+          set -euo pipefail
+          test -e /dev/kvm || { echo "::error::KVM absent du runner, émulation accélérée impossible"; exit 1; }
+          sudo chmod a+rw /dev/kvm
+          test -r /dev/kvm && test -w /dev/kvm
+          ls -l /dev/kvm
       - name: Tester le démarrage sur Android 14
         uses: reactivecircus/android-emulator-runner@v2
         with:
