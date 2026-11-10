@@ -10,7 +10,7 @@ on:
       - 'LogoLeFilTalk.png'
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: lefil-fluffy-${{ github.ref }}
@@ -75,6 +75,26 @@ jobs:
           "$APKSIGNER" verify --verbose "$APK"
           sha256sum "$APK" | tee apk-sha256.txt
           cp "$APK" Le-Fil-Talk-FluffyChat-test.apk
+      - name: Publier lien direct de l'APK de test après compilation et vérification
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          TAG="lefil-talk-fluffychat-test-20261110"
+          APK="Le-Fil-Talk-FluffyChat-test.apk"
+          cp Le-Fil-Talk-FluffyChat-test.apk "$APK"
+          test -s "$APK"
+          if gh release view "$TAG" --repo "${{ github.repository }}" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$APK" --repo "${{ github.repository }}" --clobber
+          else
+            gh release create "$TAG" "$APK" \
+              --repo "${{ github.repository }}" \
+              --target fluffychat-reprise \
+              --title "Le Fil Talk — APK Android de test" \
+              --notes "APK de TEST non validée sur téléphone. FluffyChat personnalisé, aucune préconfiguration de salons. Ne pas distribuer aux adhérents avant les essais fonctionnels." \
+              --prerelease
+          fi
+          gh release view "$TAG" --repo "${{ github.repository }}" --json assets,url --jq '{url, assets: [.assets[].url]}'
       - name: Archiver l'APK Android directement (non validée sur téléphone)
         uses: actions/upload-artifact@v4
         with:
