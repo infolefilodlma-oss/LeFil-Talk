@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches: [fluffychat-reprise]
-    paths: ['.github/workflows/fluffychat-smoke.yml']
+    paths: ['.github/workflows/fluffychat-smoke.yml', 'tools/fluffychat_smoke.sh']
 
 permissions:
   contents: read
