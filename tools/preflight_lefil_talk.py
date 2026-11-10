@@ -40,7 +40,7 @@ require("git clone --depth 1 --branch v26.10.1" in workflow,
         "version amont verrouillée")
 require("gh release" not in workflow, "pas de publication depuis la compilation diagnostique")
 logo = (root / "LogoLeFilTalk.png").read_bytes()
-require(logo[:8] == b"\\x89PNG\\r\\n\\x1a\\n" and
+require(logo[:8] == bytes.fromhex("89504e470d0a1a0a") and
         len(logo) >= 24 and
         struct.unpack(">II", logo[16:24]) == (1254, 1254),
         "logo officiel PNG 1254 x 1254")
