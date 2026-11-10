@@ -15,7 +15,8 @@ timeout 70s adb wait-for-device
 timeout 120s adb install -r release-apk/Le-Fil-Talk-FluffyChat-test.apk | tee "$proof/installation.txt"
 timeout 25s adb shell pm path net.lefil.talk | tee "$proof/package.txt" | grep -q package:
 timeout 15s adb logcat -c || true
-timeout 45s adb shell monkey -p net.lefil.talk 1 > "$proof/lancement.txt" 2>&1
+timeout 45s adb shell am start -W -n net.lefil.talk/chat.fluffy.fluffychat.MainActivity > "$proof/lancement.txt" 2>&1
+cat "$proof/lancement.txt"
 sleep 8
 timeout 25s adb shell pidof net.lefil.talk > "$proof/pid.txt" || true
 timeout 25s adb shell screencap -p /sdcard/lefil-talk-demarrage.png
