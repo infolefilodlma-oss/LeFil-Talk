@@ -20,6 +20,10 @@ assert s.count(anchor)==1
 s=s.replace(anchor,anchor+"""import io.element.android.libraries.designsystem.theme.components.Text
 import io.element.android.libraries.designsystem.theme.components.Button
 """)
+anchor="    val appBarState = rememberTopAppBarState()\\n"
+assert s.count(anchor)==1
+s=s.replace(anchor, """    var leFilSpaceSection by remember { mutableStateOf<String?>(null) }
+"""+anchor)
 anchor="                when (state.currentHomeNavigationBarItem) {\n                    HomeNavigationBarItem.Chats -> {\n                        RoomListContentView("
 assert s.count(anchor)==1
 s=s.replace(anchor,"""                Column {
