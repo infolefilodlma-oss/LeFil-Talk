@@ -71,7 +71,7 @@ jobs:
         working-directory: upstream
         run: |
           chmod +x gradlew
-          ./gradlew --no-daemon :app:assembleFdroidDebug
+          ./gradlew --no-daemon --no-configuration-cache :app:assembleFdroidDebug
       - name: Vérifier artefact et empreinte
         run: |
           find upstream/app/build/outputs/apk/fdroid/debug -type f -name '*.apk' -size +0c -print -exec sha256sum {} \; | tee apk-checks.txt
