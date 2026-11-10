@@ -95,9 +95,12 @@ assert s.count('onRoomClick(spaceId)') == 1
 # Le filtre est facultatif : l'onglet natif Espaces conserve la liste complete.
 space_path = Path("upstream/features/home/impl/src/main/kotlin/io/element/android/features/home/impl/spaces/HomeSpacesView.kt")
 space_src = space_path.read_text()
-old = "    state: HomeSpacesState,\n    lazyListState: LazyListState,"
+old = """    state: HomeSpacesState,
+    lazyListState: LazyListState,"""
 assert space_src.count(old) == 1
-space_src = space_src.replace(old, "    state: HomeSpacesState,\n    leFilSection: String? = null,\n    lazyListState: LazyListState,")
+space_src = space_src.replace(old, """    state: HomeSpacesState,
+    leFilSection: String? = null,
+    lazyListState: LazyListState,""")
 old = "    if (state.spaceRooms.isEmpty()) {"
 assert space_src.count(old) == 1
 space_src = space_src.replace(old, """    val visibleSpaces = if (leFilSection == null) {
