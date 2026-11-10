@@ -1,0 +1,33 @@
+name: Retirer les anciens APK Element X uniquement
+on:
+  push:
+    branches: [conversations-apk]
+    paths: ['.github/workflows/retirer-element-x-apk.yml']
+permissions:
+  contents: write
+  actions: write
+jobs:
+  cleanup:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Supprimer uniquement les publications APK Element X du 9 novembre
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for tag in lefil-talk-marque-essai-20261109 lefil-talk-inscription-essai-20261109 lefil-talk-essai-20261109; do
+            data="$(gh api "repos/$GH_REPO/releases/tags/$tag" 2>/dev/null || true)"
+            if [[ -z "$data" ]]; then echo "Absente : $tag"; continue; fi
+            echo "$data" | jq -e --arg tag "$tag" '.tag_name == $tag and (.assets | length > 0) and all(.assets[]; (.name | test("^(Le-Fil-Talk-Android-ARM64-.*\\.(apk|zip))$")))' >/dev/null
+            id="$(echo "$data" | jq -r '.id')"
+            gh api -X DELETE "repos/$GH_REPO/releases/$id"
+            echo "Publication supprimée : $tag ($id)"
+          done
+          # Les journaux des compilations restent disponibles comme traçabilité.
+          # Supprimer les artefacts Element X de test connus, sans toucher aux APK Conversations.
+          gh api --paginate "repos/$GH_REPO/actions/artifacts?per_page=100" --jq '.artifacts[] | select(.name | test("^(lefil-talk-arm64-test-non-publiable|lefil-talk-android15-capture-visuelle)$")) | .id' | while read -r id; do
+            gh api -X DELETE "repos/$GH_REPO/actions/artifacts/$id"
+            echo "Artefact de test Element X supprimé : $id"
+          done
