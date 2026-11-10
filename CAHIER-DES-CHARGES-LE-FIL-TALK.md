@@ -76,3 +76,16 @@ Application Android de messagerie conviviale pour les adhérents du Fil : aussi 
 - Compilation et tests finaux de la **nouvelle APK FluffyChat** non encore validés.
 - Ancienne branche Element X fonctionnelle au démarrage préservée, mais non retenue comme base principale.
 - Le présent cahier des charges sert de source de vérité pour chaque modification et pour le différentiel final.
+
+## 11. Contrôles de cohérence et risques de conflit (10 novembre 2026)
+- **Domaine Atrium** : le nom Atrium a précédemment désigné le service HumHub. La demande récente affecte `atrium.le-fil.net` à Element Web ou Cinny. Vérifier le DNS, les services et le site actuel avant toute migration ; ne rien écraser. La disponibilité du domaine n'est **pas vérifiée**.
+- **Identifiants Android et notifications** : remplacer l'`applicationId` implique des contrôles des `intent-filter`, activités/services de push, canaux de notifications, configuration UnifiedPush/FCM, authentification SSO et liens profonds. Les valeurs amont `chat.fluffy.fluffychat`, `im.fluffychat.app` et `im.fluffychat` ne sont pas toutes rebaptisées ; considérer cela comme un **point de compatibilité à examiner**, pas comme une preuve de conformité.
+- **Signature APK** : une APK debug n'est pas une APK de production. Installer une nouvelle application sous un autre identifiant peut coexister avec l'ancienne, mais la même identité Android signée avec une autre clé ne permet pas la mise à jour normale. Planifier la signature durable avant diffusion.
+- **Chiffrement** : le choix de salons non chiffrés relève de leur configuration Matrix côté web ; ne pas confondre cela avec le fonctionnement natif de la récupération des clés ou des discussions privées sur FluffyChat.
+- **Appels** : permissions caméra/microphone dans le manifeste ne démontrent pas que les appels fonctionnent, ni leur compatibilité avec les appels d'Element Web/Cinny. Test réel entre deux clients obligatoire.
+- **Poppins légèrement plus petite** : la présence de Poppins n'implique pas une réduction des tailles. Ajustement typographique et contrôle visuel encore à réaliser.
+- **Thème** : vérifier qu'une préférence utilisateur ou une couleur dynamique Android n'écrase pas bleu/prune. Conserver une option d'accessibilité raisonnable.
+- **Accueil et Matrix.org** : ne pas confondre absence de mention dans l'écran d'accueil et masquage technique universel de l'hébergeur. Aucune promesse de dissimulation totale avant tests.
+- **Obligations open source** : FluffyChat est sous AGPL-3.0-or-later, conserver notices et obligations applicables à la distribution d'une version modifiée.
+- **Aucun déploiement web ou changement de domaine** avant décision sur Element Web/Cinny et vérification de l'existant.
+- **État de validation** : contrôles du code et CI ne prouvent ni l'expérience utilisateur, ni les appels, ni les notifications ; conserver ces cases ouvertes dans la recette.
