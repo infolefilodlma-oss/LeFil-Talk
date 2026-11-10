@@ -19,6 +19,9 @@ for activity in ("MainActivity", "FcmPushService", "UnifiedPushService"):
     change("android/app/src/main/AndroidManifest.xml",
            f'android:name=".{activity}"', f'android:name="chat.fluffy.fluffychat.{activity}"')
 change("android/app/build.gradle.kts", 'applicationId = "chat.fluffy.fluffychat"', 'applicationId = "net.lefil.talk"')
+# Candidat de test en mode release AOT, signé avec la clé DEBUG Android :
+# ne jamais présenter cette signature comme une signature de publication définitive.
+change("android/app/build.gradle.kts", 'signingConfig = signingConfigs.getByName("release")', 'signingConfig = signingConfigs.getByName("debug")')
 change("lib/config/app_config.dart", "static const Color primaryColor = Color(0xFF261386);", "static const Color primaryColor = Color(0xFF4A0050);")
 change("lib/config/themes.dart", "seedColor: seed ?? Color(AppSettings.colorSchemeSeedInt.value),", "seedColor: const Color(0xFF4A0050),")
 change("lib/config/themes.dart", "      useMaterial3: true,", "      useMaterial3: true,\n      fontFamily: 'Poppins',")
