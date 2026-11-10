@@ -58,14 +58,46 @@ jobs:
       - name: Générer les icônes Le Fil Talk
         working-directory: fluffychat
         run: dart run flutter_launcher_icons
-      - name: Compiler l'APK Android ARM64 de test
+      - name: Vérifier les ressources graphiques produites avant la compilation
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+          import hashlib
+          logo = Path('LogoLeFilTalk.png')
+          assert hashlib.sha256(logo.read_bytes()).hexdigest() == 'f8cc9c0dbd585615aa3d7ffebff924415ef66761610a5aaeb1ece33b01995f5b'
+          base = Path('fluffychat/android/app/src/main/res')
+          icons = list(base.glob('mipmap-*/ic_launcher.png'))
+          splashes = list(base.glob('drawable-*/splash.png'))
+          assert len(icons) >= 4, icons
+          assert len(splashes) >= 4, splashes
+          for p in icons + splashes:
+              with Image.open(p) as im:
+                  assert im.width > 0 and im.height > 0
+                  assert im.getbbox() is not None
+          proof = Path('brand-proof')
+          proof.mkdir(exist_ok=True)
+          for p in (max(icons, key=lambda p: p.stat().st_size), max(splashes, key=lambda p: p.stat().st_size)):
+              (proof / p.name).write_bytes(p.read_bytes())
+          print('Logo source conforme et icônes/splash produits : OK')
+          PY
+      - name: Archiver les preuves visuelles
+        uses: actions/upload-artifact@v4
+        with:
+          name: lefil-fluffychat-images-reelles
+          path: brand-proof/
+          if-no-files-found: error
+      - name: Compiler l'APK Android ARM64 optimisée de test
         working-directory: fluffychat
-        run: flutter build apk --debug --target-platform android-arm64
+        run: flutter build apk --release --target-platform android-arm64
       - name: Vérifier l'APK et son identité
         run: |
           set -euo pipefail
-          APK=fluffychat/build/app/outputs/flutter-apk/app-debug.apk
+          APK=fluffychat/build/app/outputs/flutter-apk/app-release.apk
           test -s "$APK"
+          APK_BYTES=$(stat -c %s "$APK")
+          test "$APK_BYTES" -lt 125000000 || { echo "::error::APK de test encore trop volumineuse : $APK_BYTES"; exit 1; }
+          echo "Taille de l'APK optimisée : $APK_BYTES octets"
           AAPT="$(find "$ANDROID_HOME/build-tools" -name aapt -type f | sort -V | tail -1)"
           APKSIGNER="$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -1)"
           "$AAPT" dump badging "$APK" | grep '^package:' | tee apk-identite.txt
