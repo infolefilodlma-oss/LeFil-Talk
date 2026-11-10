@@ -139,10 +139,9 @@ jobs:
           script: |
             set -eu
             mkdir -p lefil-talk-ui-proof
-            APK="$(find artefact -name 'app-fdroid-x86_64-debug.apk' -print -quit)"
-            test -s "$APK"
+            test -s artefact/upstream/app/build/outputs/apk/fdroid/debug/app-fdroid-x86_64-debug.apk
             adb wait-for-device
-            adb install -r "$APK"
+            adb install -r artefact/upstream/app/build/outputs/apk/fdroid/debug/app-fdroid-x86_64-debug.apk
             adb shell pm path net.lefil.talk.debug | grep -q package:
             adb logcat -c || true
             adb shell monkey -p net.lefil.talk.debug 1 > lefil-talk-ui-proof/launch.txt 2>&1
