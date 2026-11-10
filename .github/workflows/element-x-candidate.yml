@@ -106,13 +106,13 @@ jobs:
       - name: Installer et démarrer Le Fil Talk sur Android 15 (émulateur)
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 35
-          target: google_apis
+          api-level: 34
+          target: default
           arch: x86_64
           profile: pixel_2
           cores: 2
-          ram-size: 4096M
-          heap-size: 512M
+          ram-size: 2048M
+          heap-size: 256M
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
           disable-animations: true
           script: |
