@@ -37,7 +37,18 @@ change("lib/pages/intro/intro_page.dart",
        "welcomeText ?? 'Bienvenue sur Le Fil Talk. Retrouvez vos discussions, vos groupes et vos amis.',")
 change("lib/pages/intro/intro_page.dart",
        "L10n.of(context).loginWithMatrixId,",
-       "'Connexion avec un identifiant existant',")
+       "'Autre méthode de connexion',")
+# Premier écran destiné aux adhérents francophones : texte compact, lisible,
+# sans libellés anglais ni formulaires techniques ajoutés.
+change("lib/pages/intro/intro_page.dart",
+       "style: TextStyle(fontSize: 20),",
+       "style: TextStyle(fontSize: 16),")
+change("lib/pages/intro/intro_page.dart",
+       "L10n.of(context).createNewAccount,",
+       "'Créer mon compte',")
+change("lib/pages/intro/intro_page.dart",
+       "child: Text(L10n.of(context).signIn),",
+       "child: Text('Se connecter'),")
 
 change("lib/config/themes.dart", "seedColor: seed ?? Color(AppSettings.colorSchemeSeedInt.value),", "seedColor: const Color(0xFF4A0050),")
 change("lib/config/themes.dart", "      useMaterial3: true,", "      useMaterial3: true,\n      fontFamily: 'Poppins',")
