@@ -62,6 +62,15 @@ jobs:
           assert count==1, "Icône de lancement non identifiée dans le manifeste"
           ms=re.sub(r'android:roundIcon="@(?:drawable|mipmap)/[^"]+"','android:roundIcon="@mipmap/lefil_launcher"',ms)
           manifest.write_text(ms)
+          # Le manifest du flavor Conversations definit lui aussi l'icône ;
+          # harmoniser les deux pour éviter une erreur du fusionneur Android.
+          flavor=root/"src/conversations/AndroidManifest.xml"
+          assert flavor.is_file(), "Manifeste du flavor Conversations introuvable"
+          fs=flavor.read_text()
+          fs,nf=re.subn(r'android:icon="@(?:drawable|mipmap)/[^"]+"','android:icon="@mipmap/lefil_launcher"',fs)
+          assert nf==1, "Icône du flavor Conversations introuvable"
+          fs=re.sub(r'android:roundIcon="@(?:drawable|mipmap)/[^"]+"','android:roundIcon="@mipmap/lefil_launcher"',fs)
+          flavor.write_text(fs)
           sizes={"mipmap-mdpi":48,"mipmap-hdpi":72,"mipmap-xhdpi":96,"mipmap-xxhdpi":144,"mipmap-xxxhdpi":192}
           for folder,size in sizes.items():
               dest=root/"src/main/res"/folder/"lefil_launcher.png"
