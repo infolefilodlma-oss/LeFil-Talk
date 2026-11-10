@@ -107,25 +107,35 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 35
-          target: default
+          target: google_apis
           arch: x86_64
           profile: pixel_2
+          cores: 2
+          ram-size: 4096M
+          heap-size: 512M
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
           disable-animations: true
           script: |
+            set -eu
+            mkdir -p lefil-talk-ui-proof
+            adb wait-for-device
+            adb shell getprop sys.boot_completed | grep -q 1
+            adb shell input keyevent 82
             adb install -r upstream/app/build/outputs/apk/fdroid/debug/app-fdroid-x86_64-debug.apk
             adb shell pm path net.lefil.talk.debug | grep -q package:
-            adb shell monkey -p net.lefil.talk.debug 1
-            sleep 10
-            adb shell pidof net.lefil.talk.debug
-            mkdir -p lefil-talk-ui-proof
+            adb logcat -c || true
+            adb shell am start -W -n net.lefil.talk.debug/io.element.android.x.MainActivity > lefil-talk-ui-proof/launch.txt 2>&1 || true
+            cat lefil-talk-ui-proof/launch.txt
+            sleep 8
+            adb shell pidof net.lefil.talk.debug > lefil-talk-ui-proof/pid.txt || true
+            adb logcat -d -t 1500 > lefil-talk-ui-proof/logcat.txt || true
             adb shell screencap -p /sdcard/lefil-talk-start.png
             adb pull /sdcard/lefil-talk-start.png lefil-talk-ui-proof/startup-android15.png
             adb shell uiautomator dump /sdcard/lefil-talk-ui.xml
             adb pull /sdcard/lefil-talk-ui.xml lefil-talk-ui-proof/startup-hierarchy.xml
-            # Ne jamais valider une capture d'une boite d'erreur Android comme preuve de l'interface.
+            test -s lefil-talk-ui-proof/pid.txt || { echo "::error::Le Fil Talk ne reste pas lancé"; exit 1; }
             ! grep -Eqi "System UI isn't responding|isn't responding|Close app|ne répond pas" lefil-talk-ui-proof/startup-hierarchy.xml
-            adb shell pidof net.lefil.talk.debug >/dev/null || { echo "::error::Application absente"; exit 1; }
-            echo "Capture Android sans dialogue ANR detecte (pas de validation des ecrans connectes)."
+            echo "Processus Le Fil Talk présent, capture et journaux archivés."
       - name: Archiver preuves visuelles Android 15
         if: always()
         uses: actions/upload-artifact@v4
