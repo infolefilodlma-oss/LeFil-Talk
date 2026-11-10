@@ -42,8 +42,12 @@ jobs:
           cache: true
       - name: Installer Rust requis par les dépendances
         uses: dtolnay/rust-toolchain@stable
-      - name: Installer le SDK Android
-        uses: android-actions/setup-android@v3
+      - name: Vérifier le SDK Android fourni par le runner
+        run: |
+          set -euo pipefail
+          test -x "$ANDROID_HOME/platform-tools/adb"
+          test -d "$ANDROID_HOME/cmdline-tools/latest"
+          echo "SDK Android existant vérifié"
       - name: Libérer de l'espace avant la compilation
         run: |
           df -h .
