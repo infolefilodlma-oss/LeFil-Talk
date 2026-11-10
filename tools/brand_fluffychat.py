@@ -23,6 +23,22 @@ change("android/app/build.gradle.kts", 'applicationId = "chat.fluffy.fluffychat"
 # ne jamais présenter cette signature comme une signature de publication définitive.
 change("android/app/build.gradle.kts", 'signingConfig = signingConfigs.getByName("release")', 'signingConfig = signingConfigs.getByName("debug")')
 change("lib/config/app_config.dart", "static const Color primaryColor = Color(0xFF261386);", "static const Color primaryColor = Color(0xFF4A0050);")
+# Nom visible dans l'interface (distinct du libellé Android dans le manifeste).
+change("lib/config/setting_keys.dart",
+       "applicationName<String>('chat.fluffy.application_name', 'FluffyChat'),",
+       "applicationName<String>('chat.fluffy.application_name', 'Le Fil Talk'),")
+# Accueil: supprimer la publicité technique Matrix et l'anglais de l'écran initial.
+# Conserver les boutons et les parcours natifs de connexion et inscription.
+change("lib/pages/intro/intro_page.dart",
+       "Text(L10n.of(context).appSubtitle,",
+       "Text('Se relier malgré la distance et la dispersion',")
+change("lib/pages/intro/intro_page.dart",
+       "welcomeText ?? L10n.of(context).appDescription,",
+       "welcomeText ?? 'Bienvenue sur Le Fil Talk. Retrouvez vos discussions, vos groupes et vos amis.',")
+change("lib/pages/intro/intro_page.dart",
+       "child: Text(L10n.of(context).loginWithMatrixId),",
+       "child: Text('Connexion avec un identifiant existant'),")
+
 change("lib/config/themes.dart", "seedColor: seed ?? Color(AppSettings.colorSchemeSeedInt.value),", "seedColor: const Color(0xFF4A0050),")
 change("lib/config/themes.dart", "      useMaterial3: true,", "      useMaterial3: true,\n      fontFamily: 'Poppins',")
 # Poppins 400/500/700 : pour une identité cohérente tout en gardant les composants natifs.
