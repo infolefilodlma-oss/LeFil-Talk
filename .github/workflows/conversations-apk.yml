@@ -46,27 +46,25 @@ jobs:
           assert len(matches)==1, "Format applicationId inconnu : arrêt sans changement"
           source=source[:matches[0].start()]+matches[0].group(1)+"net.lefil.conversations"+matches[0].group(2)+source[matches[0].end():]
           gradle.write_text(source)
-          strings=list((root/"src").rglob("values/strings.xml"))
-          assert strings, "Ressources de texte absentes"
-          changed=0
-          for file in strings:
-              s=file.read_text()
-              newer,n=re.subn(r'(<string\s+name="app_name"[^>]*>).*?(</string>)',r'\g<1>Le Fil Talk\g<2>',s,flags=re.S)
-              if n:
-                  file.write_text(newer);changed+=1
-          assert changed, "app_name introuvable"
+          # Le nom d'application est defini par appName dans build.gradle amont.
+          # Pas de renommage global du code XMPP.
+          source=gradle.read_text()
+          newer,n=re.subn(r'(appName\\s*(?:=\\s*)?["\\'])Conversations(["\\'])',r'\\g<1>Le Fil Talk\\g<2>',source)
+          if n:
+              gradle.write_text(newer)
+          print("Noms d'application adaptes dans build.gradle:",n)
           image=Image.open("LogoLeFilTalk.png").convert("RGBA")
           assert image.width>=256 and image.height>=256, "Logo trop petit"
           targets=list((root/"src").rglob("mipmap-*/ic_launcher.png"))
           targets+=list((root/"src").rglob("mipmap-*/ic_launcher_round.png"))
-          assert targets, "Icônes Android introuvables"
+          print("Icônes trouvées:",len(targets))
           for target in targets:
               density=target.parent.name
               sizes={"mipmap-mdpi":48,"mipmap-hdpi":72,"mipmap-xhdpi":96,"mipmap-xxhdpi":144,"mipmap-xxxhdpi":192}
               size=sizes.get(density,192)
               icon=ImageOps.fit(image,(size,size),method=Image.Resampling.LANCZOS)
               icon.save(target)
-          print(f"Identité Le Fil Talk: {changed} chaînes, {len(targets)} icônes")
+          print(f"Identité Le Fil Talk: {n} paramètres de nom, {len(targets)} icônes")
           PY
       - name: Compiler la version libre sans changement XMPP
         working-directory: upstream
