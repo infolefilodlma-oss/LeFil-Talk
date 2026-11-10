@@ -52,7 +52,7 @@ for variant in ("debug", "nightly", "release"):
         raise SystemExit(f"Fond adaptatif absent : {background}")
     source = background.read_text(encoding="utf-8")
     import re
-    updated, count = re.subn(r'(android:fillColor=")#[0-9A-Fa-f]{6,8}(")', r'\\g<1>#0C1853\\g<2>', source)
+    updated, count = re.subn(r'(android:fillColor=")#[0-9A-Fa-f]{6,8}(")', lambda m: m.group(1) + "#0C1853" + m.group(2), source)
     if count != 1:
         raise SystemExit(f"Fond adaptatif inattendu : {background}")
     background.write_text(updated, encoding="utf-8")
