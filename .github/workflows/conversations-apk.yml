@@ -49,7 +49,7 @@ jobs:
           # Le nom d'application est defini par appName dans build.gradle amont.
           # Pas de renommage global du code XMPP.
           source=gradle.read_text()
-          newer,n=re.subn(r'(appName\\s*(?:=\\s*)?["\\'])Conversations(["\\'])',r'\\g<1>Le Fil Talk\\g<2>',source)
+          newer,n=re.subn(r"""(appName\s*(?:=\s*)?["'])Conversations(["'])""",r'\g<1>Le Fil Talk\g<2>',source)
           if n:
               gradle.write_text(newer)
           print("Noms d'application adaptes dans build.gradle:",n)
