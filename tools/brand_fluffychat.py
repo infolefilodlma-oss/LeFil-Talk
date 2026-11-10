@@ -13,6 +13,10 @@ def change(path, old, new):
     p.write_text(source.replace(old, new), encoding="utf-8")
 
 change("android/app/src/main/AndroidManifest.xml", 'android:label="FluffyChat"', 'android:label="Le Fil Talk"')
+# Conserver la résolution correcte des classes natives malgré le nouvel applicationId.
+for activity in ("MainActivity", "FcmPushService", "UnifiedPushService"):
+    change("android/app/src/main/AndroidManifest.xml",
+           f'android:name=".{activity}"', f'android:name="chat.fluffy.fluffychat.{activity}"')
 change("android/app/build.gradle.kts", 'applicationId = "chat.fluffy.fluffychat"', 'applicationId = "net.lefil.talk"')
 change("lib/config/app_config.dart", "static const Color primaryColor = Color(0xFF261386);", "static const Color primaryColor = Color(0xFF4A0050);")
 change("lib/config/themes.dart", "seedColor: seed ?? Color(AppSettings.colorSchemeSeedInt.value),", "seedColor: const Color(0xFF4A0050),")
