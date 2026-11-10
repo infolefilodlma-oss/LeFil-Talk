@@ -10,6 +10,7 @@ on:
       - 'tools/apply_poppins.py'
       - 'tools/apply_theme_colors.py'
       - 'LogoLeFilTalk.png'
+      - 'tools/apply_signup_help.py'
 
 permissions:
   contents: read
@@ -45,6 +46,18 @@ jobs:
         run: python3 tools/apply_poppins.py
       - name: Appliquer les couleurs natives Le Fil Talk (clair/sombre)
         run: python3 tools/apply_theme_colors.py
+      - name: Aide inscription matrix.org dans le parcours Element X
+        run: python3 tools/apply_signup_help.py
+      - name: Vérifier la validité des fonds du logo adaptatif
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import xml.etree.ElementTree as ET
+          for variant in ('debug', 'nightly', 'release'):
+              p = Path('upstream/appicon/element/src') / variant / 'res/drawable/ic_launcher_background.xml'
+              ET.parse(p)
+              print('XML valide:', p)
+          PY
       - name: Conserver la preuve du logo utilisé dans la compilation
         run: |
           sha256sum LogoLeFilTalk.png | tee logo-sha256.txt
