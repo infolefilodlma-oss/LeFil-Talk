@@ -114,7 +114,19 @@ space_src = space_src.replace(old, """    val visibleSpaces = if (leFilSection =
                 name.startsWith("$leFilSection /", ignoreCase = true)
         }
     }
-    if (visibleSpaces.isEmpty()) {""")
+    if (visibleSpaces.isEmpty() && leFilSection != null) {
+        Column(
+            modifier = modifier.fillMaxWidth().padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(
+                text = "Aucun espace $leFilSection disponible pour ce compte",
+                style = ElementTheme.typography.fontBodyLgRegular,
+                color = ElementTheme.colors.textSecondary,
+                textAlign = TextAlign.Center,
+            )
+        }
+    } else if (visibleSpaces.isEmpty()) {""")
 assert space_src.count("items = state.spaceRooms,") == 1
 space_src = space_src.replace("items = state.spaceRooms,", "items = visibleSpaces,")
 space_src = space_src.replace("numberOfSpaces = state.spaceRooms.size", "numberOfSpaces = visibleSpaces.size")
