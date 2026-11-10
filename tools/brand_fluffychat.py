@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Personnalisation minimale de FluffyChat v2.11.5 ; aucune création de salon ni désactivation du chiffrement."""
 from pathlib import Path
-from PIL import Image
+from PIL import Image, ImageOps
 from urllib.request import urlopen
+import hashlib
 
 root = Path("fluffychat")
 def change(path, old, new):
@@ -47,7 +48,12 @@ font_yaml = """  fonts:
 """
 pub.write_text(source.replace(anchor, anchor + font_yaml), encoding="utf-8")
 # L'icône vient uniquement du logo officiel Le Fil Talk.
-logo = Image.open("LogoLeFilTalk.png").convert("RGBA")
+original_logo_path = Path("LogoLeFilTalk.png")
+expected_sha256 = "f8cc9c0dbd585615aa3d7ffebff924415ef66761610a5aaeb1ece33b01995f5b"
+actual_sha256 = hashlib.sha256(original_logo_path.read_bytes()).hexdigest()
+if actual_sha256 != expected_sha256:
+    raise RuntimeError(f"Logo non conforme à l'image fournie par l'utilisateur: {actual_sha256}")
+logo = Image.open(original_logo_path).convert("RGBA")
 if logo.size != (1254, 1254):
     raise RuntimeError("Logo officiel inattendu")
 assets = root / "assets/logo/img"
@@ -67,4 +73,29 @@ bg.save(assets / "logo_background.png")
 mono = Image.new("RGBA", (1024, 1024), "white")
 mono.putalpha(logo.resize((1024, 1024), Image.Resampling.LANCZOS).getchannel("A"))
 mono.save(assets / "logo_mono.png")
-print("Identité Le Fil Talk appliquée: logo, nom, couleurs et Poppins. Aucune préconfiguration des espaces.")
+# Remplacer les éléments visuels FluffyChat effectivement affichés, sans redessiner le logo.
+# Adapter uniquement les dimensions du logo source, conserver sa forme et ses couleurs.
+for directory in (root / "assets/logo/img", root / "assets/logo/mini"):
+    for path in directory.glob("*.png"):
+        if path.name in {"logo_background.png", "logo_foreground.png", "logo_mono.png", "logo.png", "logo_standalone.png"} and directory == assets:
+            continue
+        with Image.open(path) as template:
+            canvas_size = template.size
+        out = Image.new("RGBA", canvas_size, (0, 0, 0, 0))
+        fit = ImageOps.contain(logo, (max(1, int(canvas_size[0] * .93)), max(1, int(canvas_size[1] * .93))), Image.Resampling.LANCZOS)
+        out.alpha_composite(fit, ((canvas_size[0] - fit.width) // 2, (canvas_size[1] - fit.height) // 2))
+        out.save(path)
+# Image de démarrage Android : remplacer le chat FluffyChat dans TOUS les dossiers de densité.
+for path in (root / "android/app/src/main/res").glob("drawable-*/splash.png"):
+    with Image.open(path) as template:
+        canvas_size = template.size
+    out = Image.new("RGBA", canvas_size, (0, 0, 0, 0))
+    fit = ImageOps.contain(logo, (max(1, int(canvas_size[0] * .88)), max(1, int(canvas_size[1] * .88))), Image.Resampling.LANCZOS)
+    out.alpha_composite(fit, ((canvas_size[0] - fit.width) // 2, (canvas_size[1] - fit.height) // 2))
+    out.save(path)
+# Fournir un fond bleu profond au splash, dans la palette Le Fil.
+for path in (root / "android/app/src/main/res").glob("drawable-*/background.png"):
+    with Image.open(path) as template:
+        size = template.size
+    Image.new("RGB", size, "#0C1853").save(path)
+print("Logo original SHA256 vérifié, identité des icônes et du splash remplacée, aucune préconfiguration des espaces.")
