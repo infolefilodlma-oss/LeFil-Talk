@@ -2,6 +2,9 @@ name: Element X - diagnostic compilation Android
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - element-x-matrixorg-reprise
 
 permissions:
   contents: read
