@@ -82,5 +82,9 @@ private fun LeFilNavigation(
 
 @Composable
 private fun HomeFloatingActionButton(""")
+assert s.count('private fun LeFilNavigation(') == 1
+assert s.count('RoomListContentView(') >= 1
+assert s.count('HomeSpacesView(') >= 1
+assert s.count('onRoomClick(spaceId)') == 1
 p.write_text(s)
 print("Navigation Le Fil connectee aux ecrans natifs Chats / Spaces / StartChat.")
