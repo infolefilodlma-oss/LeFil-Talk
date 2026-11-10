@@ -51,8 +51,16 @@ logo = Image.open("LogoLeFilTalk.png").convert("RGBA")
 if logo.size != (1254, 1254):
     raise RuntimeError("Logo officiel inattendu")
 assets = root / "assets/logo/img"
-for name in ("logo.png", "logo_standalone.png", "logo_foreground.png"):
+# Icônes legacy: conserver le logo rond entier sur fond transparent.
+for name in ("logo.png", "logo_standalone.png"):
     logo.resize((1024, 1024), Image.Resampling.LANCZOS).save(assets / name)
+# Icône adaptative Android: zone de sûreté centrale pour les masques circulaires.
+# Ne pas remplir toute la surface: le système recadre sur certains téléphones.
+safe = 672
+foreground = Image.new("RGBA", (1024, 1024), (0, 0, 0, 0))
+small_logo = logo.resize((safe, safe), Image.Resampling.LANCZOS)
+foreground.alpha_composite(small_logo, ((1024 - safe) // 2, (1024 - safe) // 2))
+foreground.save(assets / "logo_foreground.png")
 bg = Image.new("RGBA", (1024, 1024), "#0C1853")
 bg.save(assets / "logo_background.png")
 # Icône monochrome cohérente (silhouette alpha du logo).
