@@ -1,0 +1,84 @@
+name: Le Fil Talk - FluffyChat Android (candidat)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [fluffychat-reprise]
+    paths:
+      - '.github/workflows/fluffychat-candidate.yml'
+      - 'tools/brand_fluffychat.py'
+      - 'LogoLeFilTalk.png'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lefil-fluffy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  android:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 65
+    steps:
+      - name: Sources Le Fil Talk
+        uses: actions/checkout@v4
+      - name: Vérifier le script avant clonage
+        run: python3 -m py_compile tools/brand_fluffychat.py
+      - name: Télécharger FluffyChat officiel version verrouillée
+        run: |
+          set -euo pipefail
+          git clone --depth 1 --branch v2.11.5 https://github.com/krille-chan/fluffychat.git fluffychat
+          git -C fluffychat rev-parse HEAD | tee upstream-fluffychat-commit.txt
+      - name: Préparer les images et polices
+        run: python3 -m pip install --user Pillow
+      - name: Personnaliser uniquement l'identité Le Fil Talk
+        run: python3 tools/brand_fluffychat.py
+      - name: Installer Flutter officiel compatible avec FluffyChat
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.9'
+          channel: stable
+          cache: true
+      - name: Installer Rust requis par les dépendances
+        uses: dtolnay/rust-toolchain@stable
+      - name: Installer le SDK Android
+        uses: android-actions/setup-android@v3
+      - name: Libérer de l'espace avant la compilation
+        run: |
+          df -h .
+          sudo rm -rf /usr/local/lib/android/sdk/system-images /opt/hostedtoolcache/CodeQL /usr/share/dotnet || true
+      - name: Résoudre les dépendances
+        working-directory: fluffychat
+        run: flutter pub get
+      - name: Générer les icônes Le Fil Talk
+        working-directory: fluffychat
+        run: dart run flutter_launcher_icons
+      - name: Compiler l'APK Android ARM64 de test
+        working-directory: fluffychat
+        run: flutter build apk --debug --target-platform android-arm64
+      - name: Vérifier l'APK et son identité
+        run: |
+          set -euo pipefail
+          APK=fluffychat/build/app/outputs/flutter-apk/app-debug.apk
+          test -s "$APK"
+          AAPT="$(find "$ANDROID_HOME/build-tools" -name aapt -type f | sort -V | tail -1)"
+          APKSIGNER="$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -1)"
+          "$AAPT" dump badging "$APK" | grep '^package:' | tee apk-identite.txt
+          "$AAPT" dump badging "$APK" | grep '^application-label:' | tee apk-nom.txt
+          grep -F "name='net.lefil.talk'" apk-identite.txt
+          grep -Fx "application-label:'Le Fil Talk'" apk-nom.txt
+          "$APKSIGNER" verify --verbose "$APK"
+          sha256sum "$APK" | tee apk-sha256.txt
+          cp "$APK" Le-Fil-Talk-FluffyChat-test.apk
+      - name: Archiver l'APK Android directement (non validée sur téléphone)
+        uses: actions/upload-artifact@v4
+        with:
+          name: Le-Fil-Talk-FluffyChat-APK-test
+          path: |
+            Le-Fil-Talk-FluffyChat-test.apk
+            apk-identite.txt
+            apk-nom.txt
+            apk-sha256.txt
+            upstream-fluffychat-commit.txt
+          if-no-files-found: error
