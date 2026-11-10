@@ -27,7 +27,19 @@ s=s.replace(anchor,"""                Column {
                         onPapoteClick = {
                             leFilSpaceSection = null
                             state.eventSink(HomeEvent.SelectHomeNavigationBarItem(HomeNavigationBarItem.Chats))
-                            onStartChatClick()
+                            val papoteRoom = (roomListState.contentState as? io.element.android.features.home.impl.roomlist.RoomListContentState.Rooms)
+                                ?.summaries
+                                ?.firstOrNull {
+                                    !it.isSpace && (
+                                        it.name.equals("Papote", ignoreCase = true) ||
+                                            it.name.equals("Le Fil · Papote", ignoreCase = true)
+                                    )
+                                }
+                            if (papoteRoom != null) {
+                                onRoomClick(papoteRoom.roomId)
+                            } else {
+                                onStartChatClick()
+                            }
                         },
                         onSentiersClick = {
                             leFilSpaceSection = "Sentiers"
