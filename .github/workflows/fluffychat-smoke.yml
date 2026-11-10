@@ -12,22 +12,38 @@ permissions:
 jobs:
   android-smoke:
     runs-on: ubuntu-24.04
-    timeout-minutes: 18
+    timeout-minutes: 65
     steps:
       - uses: actions/checkout@v4
       - name: Contrôler le script
         run: bash -n tools/fluffychat_smoke.sh
-      - name: Télécharger depuis la Release publique
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Compiler la variante x86-64 compatible avec l'émulateur
         run: |
           set -euo pipefail
-          mkdir -p release-apk
-          gh release download lefil-talk-fluffychat-test-20261110 \
-            --repo "${{ github.repository }}" \
-            --pattern Le-Fil-Talk-FluffyChat-test.apk \
-            --dir release-apk
-          echo "a285ecb922c4441a9da46927b25af39ebf80068345e1b00dfb48d9f62dd4ad07  release-apk/Le-Fil-Talk-FluffyChat-test.apk" | sha256sum -c -
+          git clone --depth 1 --branch v2.11.5 https://github.com/krille-chan/fluffychat.git fluffychat
+          python3 -m pip install --user Pillow
+          python3 tools/brand_fluffychat.py
+      - name: Installer Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.9'
+          channel: stable
+          cache: true
+      - name: Rust
+        uses: dtolnay/rust-toolchain@stable
+      - name: Vérifier et compiler pour x86-64 seulement
+        working-directory: fluffychat
+        run: |
+          set -euo pipefail
+          flutter pub get
+          dart run flutter_launcher_icons
+          flutter build apk --release --target-platform android-x64
+          APK=build/app/outputs/flutter-apk/app-release.apk
+          test -s "$APK"
+          unzip -l "$APK" | grep -q 'lib/x86_64/libflutter.so'
+          unzip -l "$APK" | grep -q 'lib/x86_64/libapp.so'
+          mkdir -p ../release-apk
+          cp "$APK" ../release-apk/Le-Fil-Talk-FluffyChat-test.apk
       - name: Vérifier Android SDK
         run: |
           set -euo pipefail
