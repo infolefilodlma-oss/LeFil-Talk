@@ -104,8 +104,8 @@ private fun LeFilNavigation(
 
 @Composable
 private fun HomeFloatingActionButton(""")
-anchor = "                        HomeSpacesView(\\n                            state = state.homeSpacesState,"
-assert s.count(anchor) == 1, "HomeSpacesView anchor absent"
+anchor = "                            state = state.homeSpacesState,"
+assert s.count(anchor) == 1, "HomeSpacesView state anchor absent"
 s = s.replace(anchor, anchor + "\\n                            leFilSection = leFilSpaceSection,")
 assert s.count('private fun LeFilNavigation(') == 1
 assert s.count('RoomListContentView(') >= 1
