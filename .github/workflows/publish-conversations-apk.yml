@@ -16,7 +16,7 @@ jobs:
           GH_REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
-          gh run download 42768045065 --repo "$GH_REPO" -n lefil-talk-conversations-essai-android -D result
+          gh run download 42780566467 --repo "$GH_REPO" -n lefil-talk-conversations-essai-android -D result
           test -s result/Le-Fil-Talk-Conversations-ESSAI.apk
           test "$(stat -c%s result/Le-Fil-Talk-Conversations-ESSAI.apk)" -gt 10000000
           sha="$(awk '{print $1}' result/sha256.txt)"
@@ -30,10 +30,13 @@ jobs:
           GH_REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
-          tag=lefil-talk-conversations-essai-20261110
-          gh release create "$tag" result/Le-Fil-Talk-Conversations-ESSAI.apk \
+          tag=lefil-talk-poppins-essai-20261110
+          cd result
+          zip -9 Le-Fil-Talk-Poppins-ESSAI.zip Le-Fil-Talk-Conversations-ESSAI.apk identity.txt signature.txt sha256.txt
+          cd ..
+          gh release create "$tag" result/Le-Fil-Talk-Conversations-ESSAI.apk result/Le-Fil-Talk-Poppins-ESSAI.zip \
             --target "$GITHUB_SHA" \
             --title "Le Fil Talk — Conversations — APK Android d'essai" \
-            --notes "APK de test fondée sur Conversations XMPP. Logo Le Fil Talk, nom et paquet indépendant net.lefil.conversations. Compilation et signature debug vérifiées ; pas encore validée sur téléphone réel. Ne pas distribuer comme version de production. Serveur Prosody non installé." \
+            --notes "APK de test fondée sur Conversations XMPP. Logo rond Le Fil Talk, Poppins, couleurs et paquet indépendant net.lefil.conversations. Compilation et signature debug vérifiées ; pas encore validée sur téléphone réel. Ne pas distribuer comme version de production. Serveur Prosody non installé." \
             --prerelease --latest=false
           gh release view "$tag" --json assets --jq '.assets[].name' | grep -Fx 'Le-Fil-Talk-Conversations-ESSAI.apk'
