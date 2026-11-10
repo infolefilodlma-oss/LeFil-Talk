@@ -101,7 +101,7 @@ jobs:
               source=path.read_text()
               original=source
               for key,color in palette.items():
-                  source=re.sub(r'(<item\\s+name=["\\'](?:android:)?'+key+r'["\\']\\s*>)[^<]*(</item>)',lambda m:m.group(1)+color+m.group(2),source)
+                  source=re.sub(r"(<item\\s+name=['\\\"](?:android:)?"+key+r"['\\\"]\\s*>)[^<]*(</item>)",lambda m:m.group(1)+color+m.group(2),source)
               if source!=original:
                   path.write_text(source)
                   changed.append(str(path))
