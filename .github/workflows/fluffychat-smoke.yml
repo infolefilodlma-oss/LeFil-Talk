@@ -1,0 +1,57 @@
+name: Le Fil Talk - test Android sans recompilation
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [fluffychat-reprise]
+    paths: ['.github/workflows/fluffychat-smoke.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  android-smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - name: Contrôler le script
+        run: bash -n tools/fluffychat_smoke.sh
+      - name: Télécharger depuis la Release publique
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p release-apk
+          gh release download lefil-talk-fluffychat-test-20261110 \
+            --repo "${{ github.repository }}" \
+            --pattern Le-Fil-Talk-FluffyChat-test.apk \
+            --dir release-apk
+          echo "a285ecb922c4441a9da46927b25af39ebf80068345e1b00dfb48d9f62dd4ad07  release-apk/Le-Fil-Talk-FluffyChat-test.apk" | sha256sum -c -
+      - name: Vérifier Android SDK
+        run: |
+          set -euo pipefail
+          test -x "$ANDROID_HOME/platform-tools/adb"
+          test -e /dev/kvm
+          sudo chmod a+rw /dev/kvm
+          test -r /dev/kvm && test -w /dev/kvm
+      - name: Installer et lancer APK sur Android 14
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          profile: pixel_2
+          cores: 2
+          ram-size: 4096M
+          heap-size: 512M
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+          disable-animations: true
+          script: bash "$GITHUB_WORKSPACE/tools/fluffychat_smoke.sh"
+      - name: Archiver écran et logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: le-fil-talk-preuve-demarrage
+          path: lefil-fluffychat-smoke/
+          if-no-files-found: warn
