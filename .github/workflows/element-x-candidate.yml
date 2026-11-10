@@ -39,6 +39,8 @@ jobs:
         run: python3 tools/apply_theme_colors.py
       - name: Aide inscription matrix.org dans le parcours Element X
         run: python3 tools/apply_signup_help.py
+      - name: Installer accueil Le Fil, Papote, Sentiers et Oasis
+        run: python3 tools/apply_lefil_welcome.py
       - name: Vérifier la validité des fonds du logo adaptatif
         run: |
           python3 - <<'PY'
