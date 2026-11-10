@@ -21,8 +21,10 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - name: Android SDK
-        uses: android-actions/setup-android@v3
+      - name: SDK Android préinstallé
+        run: |
+          test -d "$ANDROID_HOME"
+          test -x "$ANDROID_HOME/platform-tools/adb"
       - name: Source officielle Conversations
         run: |
           set -euo pipefail
