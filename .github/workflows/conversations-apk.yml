@@ -20,7 +20,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: '21'
       - name: SDK Android préinstallé
         run: |
           test -d "$ANDROID_HOME"
@@ -55,17 +55,20 @@ jobs:
           print("Noms d'application adaptes dans build.gradle:",n)
           image=Image.open("LogoLeFilTalk.png").convert("RGBA")
           assert image.width>=256 and image.height>=256, "Logo trop petit"
-          targets=list((root/"src").rglob("mipmap-*/ic_launcher.png"))
-          targets+=list((root/"src").rglob("mipmap-*/ic_launcher_round.png"))
-          print("Icônes trouvées:",len(targets))
-          for target in targets:
-              density=target.parent.name
-              sizes={"mipmap-mdpi":48,"mipmap-hdpi":72,"mipmap-xhdpi":96,"mipmap-xxhdpi":144,"mipmap-xxxhdpi":192}
-              size=sizes.get(density,192)
-              icon=ImageOps.fit(image,(size,size),method=Image.Resampling.LANCZOS)
-              icon.save(target)
-          print(f"Identité Le Fil Talk: {n} paramètres de nom, {len(targets)} icônes")
-          PY
+          manifest=root/"src/main/AndroidManifest.xml"
+          assert manifest.is_file(), "Manifeste Android principal introuvable"
+          ms=manifest.read_text()
+          ms,count=re.subn(r'android:icon="@(?:drawable|mipmap)/[^"]+"', 'android:icon="@mipmap/lefil_launcher"', ms)
+          assert count==1, "Icône de lancement non identifiée dans le manifeste"
+          ms=re.sub(r'android:roundIcon="@(?:drawable|mipmap)/[^"]+"','android:roundIcon="@mipmap/lefil_launcher"',ms)
+          manifest.write_text(ms)
+          sizes={"mipmap-mdpi":48,"mipmap-hdpi":72,"mipmap-xhdpi":96,"mipmap-xxhdpi":144,"mipmap-xxxhdpi":192}
+          for folder,size in sizes.items():
+              dest=root/"src/main/res"/folder/"lefil_launcher.png"
+              dest.parent.mkdir(parents=True,exist_ok=True)
+              ImageOps.fit(image,(size,size),method=Image.Resampling.LANCZOS).save(dest)
+          print(f"Marque Le Fil Talk: {n} paramètres de nom, {len(sizes)} logos et manifeste modifié")
+
       - name: Compiler la version libre sans changement XMPP
         working-directory: upstream
         run: |
