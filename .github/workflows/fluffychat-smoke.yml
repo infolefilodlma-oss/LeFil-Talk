@@ -15,8 +15,14 @@ jobs:
     timeout-minutes: 65
     steps:
       - uses: actions/checkout@v4
-      - name: Contrôler le script
-        run: bash -n tools/fluffychat_smoke.sh
+      - name: Précontrôle identité avant le long build
+        run: |
+          set -euo pipefail
+          bash -n tools/fluffychat_smoke.sh
+          python3 -m py_compile tools/brand_fluffychat.py
+          grep -Fq "applicationName<String>('chat.fluffy.application_name', 'Le Fil Talk')" tools/brand_fluffychat.py
+          grep -Fq "Se relier malgré la distance et la dispersion" tools/brand_fluffychat.py
+          grep -Fq "Connexion avec un identifiant existant" tools/brand_fluffychat.py
       - name: Compiler la variante x86-64 compatible avec l'émulateur
         run: |
           set -euo pipefail
