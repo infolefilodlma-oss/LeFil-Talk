@@ -1,0 +1,46 @@
+name: Le Fil Talk - lien direct APK de test
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [fluffychat-reprise]
+    paths:
+      - '.github/workflows/publish-fluffychat-test-apk.yml'
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  publish-test-apk:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Récupérer l'APK déjà compilée et validée par CI
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh run download 42865294436 --repo "${{ github.repository }}" --name "Le-Fil-Talk-FluffyChat-APK-test" --dir apk-proof
+          test -s apk-proof/Le-Fil-Talk-FluffyChat-test.apk
+          test -s apk-proof/apk-sha256.txt
+          (cd apk-proof && sha256sum -c <(sed 's#fluffychat/build/app/outputs/flutter-apk/app-debug.apk#Le-Fil-Talk-FluffyChat-test.apk#' apk-sha256.txt))
+          grep -Fx "application-label:'Le Fil Talk'" apk-proof/apk-nom.txt
+          cp apk-proof/Le-Fil-Talk-FluffyChat-test.apk Le-Fil-Talk-Android-test.apk
+      - name: Créer une préversion GitHub avec lien APK direct
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          TAG="lefil-talk-fluffychat-test-20261110"
+          if gh release view "$TAG" --repo "${{ github.repository }}" >/dev/null 2>&1; then
+            gh release upload "$TAG" Le-Fil-Talk-Android-test.apk --repo "${{ github.repository }}" --clobber
+          else
+            gh release create "$TAG" Le-Fil-Talk-Android-test.apk \
+              --repo "${{ github.repository }}" \
+              --target fluffychat-reprise \
+              --title "Le Fil Talk — essai Android (FluffyChat)" \
+              --notes "Version de TEST, non validée sur téléphone. Identité Le Fil Talk et icône générée ; configuration des salons sur Element Web ou Cinny. Ne pas diffuser aux adhérents avant recette." \
+              --prerelease
+          fi
+          gh release view "$TAG" --repo "${{ github.repository }}" --json assets,url --jq '{url, assets: [.assets[].name]}'
