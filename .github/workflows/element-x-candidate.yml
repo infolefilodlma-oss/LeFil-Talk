@@ -2,15 +2,6 @@ name: Element X - diagnostic compilation Android
 
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - '.github/workflows/element-x-candidate.yml'
-      - 'tools/brand_candidate.py'
-      - 'tools/apply_visual_brand.py'
-      - 'tools/apply_poppins.py'
-      - 'tools/apply_theme_colors.py'
-      - 'LogoLeFilTalk.png'
-      - 'tools/apply_signup_help.py'
 
 permissions:
   contents: read
