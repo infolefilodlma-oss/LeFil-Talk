@@ -36,8 +36,8 @@ change("lib/pages/intro/intro_page.dart",
        "welcomeText ?? L10n.of(context).appDescription,",
        "welcomeText ?? 'Bienvenue sur Le Fil Talk. Retrouvez vos discussions, vos groupes et vos amis.',")
 change("lib/pages/intro/intro_page.dart",
-       "child: Text(L10n.of(context).loginWithMatrixId),",
-       "child: Text('Connexion avec un identifiant existant'),")
+       "L10n.of(context).loginWithMatrixId,",
+       "'Connexion avec un identifiant existant',")
 
 change("lib/config/themes.dart", "seedColor: seed ?? Color(AppSettings.colorSchemeSeedInt.value),", "seedColor: const Color(0xFF4A0050),")
 change("lib/config/themes.dart", "      useMaterial3: true,", "      useMaterial3: true,\n      fontFamily: 'Poppins',")
