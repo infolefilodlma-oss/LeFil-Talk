@@ -86,6 +86,30 @@ jobs:
               rounded.save(dest)
           print(f"Marque Le Fil Talk: {n} paramètres de nom, {len(sizes)} logos et manifeste modifié")
 
+      - name: Identité visuelle Le Fil — palette et typographie
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          root=Path("upstream/src/main/res")
+          # Palette Le Fil appliquée aux ressources de thèmes, sans changer XMPP.
+          # Ne modifier que les valeurs de couleur existantes ; préserver les styles natifs.
+          palette={"colorPrimary":"#29135C","colorPrimaryDark":"#160D38","colorAccent":"#A00083"}
+          changed=[]
+          for path in sorted(root.glob("values*/styles.xml")) + sorted(root.glob("values*/themes.xml")):
+              source=path.read_text()
+              original=source
+              for key,color in palette.items():
+                  source=re.sub(r'(<item\\s+name=["\\'](?:android:)?'+key+r'["\\']\\s*>)[^<]*(</item>)',lambda m:m.group(1)+color+m.group(2),source)
+              if source!=original:
+                  path.write_text(source)
+                  changed.append(str(path))
+          print("Ressources de thème adaptées:",changed)
+          # Poppins n'est pas déclarée intégrée tant que les composants natifs
+          # de Conversations ne sont pas identifiés et vérifiés.
+          PY
+
       - name: Compiler la version libre sans changement XMPP
         working-directory: upstream
         run: |
