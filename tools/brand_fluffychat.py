@@ -43,16 +43,15 @@ change("lib/pages/intro/intro_page.dart",
        "'Se relier malgré la distance et la dispersion',")
 change("lib/pages/intro/intro_page.dart",
        "welcomeText ?? L10n.of(context).appDescription,",
-       "welcomeText ?? 'Bienvenue sur Le Fil Talk. Retrouvez vos discussions, vos groupes et vos amis.',")
+       "welcomeText ?? 'Retrouvez vos échanges et vos groupes, simplement.',")
 change("lib/pages/intro/intro_page.dart",
        "L10n.of(context).loginWithMatrixId,",
        "'Autre méthode de connexion',")
-# Identite graphique reservee a l'ecran de bienvenue : aucun effet sur
-# les salons, les espaces, la recherche ou les menus apres connexion.
+# Accueil épuré : logo rond seul, sans bandeau décoratif.
+# Espacer les textes d'accueil sans modifier les boutons ni la navigation.
 change("lib/pages/intro/intro_page.dart",
-       "                            padding: const EdgeInsets.all(32.0),\n                            child: Hero(",
-       "                            padding: const EdgeInsets.all(32.0),\n                            decoration: BoxDecoration(\n                              gradient: const LinearGradient(\n                                begin: Alignment.topLeft,\n                                end: Alignment.bottomRight,\n                                colors: [Color(0xFF16073E), Color(0xFF6900B9), Color(0xFFE622A3)],\n                              ),\n                              borderRadius: BorderRadius.circular(20),\n                            ),\n                            child: Hero(")
-
+       "                          const SizedBox(height: 8),\n                          Padding(",
+       "                          const SizedBox(height: 20),\n                          Padding(")
 # Premier écran destiné aux adhérents francophones : texte compact, lisible,
 # sans libellés anglais ni formulaires techniques ajoutés.
 change("lib/pages/intro/intro_page.dart",
