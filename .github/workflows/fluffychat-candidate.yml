@@ -42,14 +42,14 @@ jobs:
           cache: true
       - name: Installer Rust requis par les dépendances
         uses: dtolnay/rust-toolchain@stable
-      - name: Activer les notifications Firebase uniquement si la configuration Le Fil est disponible
+      - name: Exiger Firebase pour toute nouvelle APK Le Fil Talk
         env:
           GOOGLE_SERVICES_JSON_B64: ${{ secrets.GOOGLE_SERVICES_JSON }}
         run: |
           set -euo pipefail
           if [ -z "$GOOGLE_SERVICES_JSON_B64" ]; then
-            echo "::notice::FCM non configure : APK de test sans notifications push autonomes."
-            exit 0
+            echo "::error::Livraison bloquee : notifications push obligatoires. Configurer le secret GOOGLE_SERVICES_JSON pour net.lefil.talk."
+            exit 1
           fi
           printf '%s' "$GOOGLE_SERVICES_JSON_B64" | base64 --decode > fluffychat/android/app/google-services.json
           python3 - <<'PY'
