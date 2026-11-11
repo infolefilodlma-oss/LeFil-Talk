@@ -58,6 +58,13 @@ Application Android **Le Fil Talk** utilisant **Matrix**, simple pour les adhér
 - Le projet FluffyChat annonce MatrixRTC/LiveKit et des appels Android entrants : https://matrix.org/blog/2026/09/11/this-week-in-matrix-2026-09-11/
 - **À prouver** : disponibilité réelle des transports RTC sur matrix.org au moment des tests, compatibilité du client compilé, invitation, sonnerie, microphone, vidéo et arrière-plan. Aucune installation VPS implicite.
 
+## 4 bis. Résultat de la première contre-vérification officielle (lecture seule)
+- **Appels : piste native étayée.** Le projet FluffyChat annonçait en septembre 2026 l'intégration d'appels MatrixRTC 1:1 et de groupe via LiveKit, avec CallKit Android ; matrix.org était cité comme serveur annonçant MatrixRTC. Source : https://matrix.org/blog/2026/09/11/this-week-in-matrix-2026-09-11/
+- **Limite importante :** le catalogue officiel Matrix continue de classer les appels 1:1 comme stables mais MatrixRTC comme **expérimental** pour FluffyChat. Source : https://matrix.org/ecosystem/clients/fluffychat/
+- **Implémentation :** le code FluffyChat 2.11.5 inspecté appelle `getLiveKitServiceUrls()` et n'active les appels RTC que si un service est découvert. Aucun test fonctionnel de Le Fil Talk sur deux appareils n'a été réalisé par cet audit.
+- **Notifications : architecture identifiée, pas encore déployée.** FluffyChat documente Matrix → passerelle push FluffyChat → FCM → téléphone : https://fluffychat.im/privacy/ ; voir aussi https://spec.matrix.org/latest/push-gateway-api/
+- **Décision de méthode :** ne pas ajouter de configuration Firebase, changer de passerelle ni installer LiveKit tant que les paramètres opérationnels d'une chaîne push Le Fil et les essais MatrixRTC n'ont pas été établis. Aucun résultat n'autorise actuellement une diffusion aux adhérents.
+
 ## 5. Plan de travail senior à suivre, sans improvisation
 **Phase 0 — Gel de référence :**
 1. Conserver R0 comme témoin et conserver le SHA et la signature rapportés ; ne pas écraser l'ancien artefact de test sans l'avoir préservé.
