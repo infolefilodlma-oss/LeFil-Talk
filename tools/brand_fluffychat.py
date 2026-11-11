@@ -4,6 +4,8 @@ from pathlib import Path
 from PIL import Image, ImageOps
 from urllib.request import urlopen
 import hashlib
+import os
+from urllib.parse import urlparse
 
 root = Path("fluffychat")
 # Le composant graphique est versionne separément; aucune dependance serveur.
@@ -26,6 +28,22 @@ change("android/app/build.gradle.kts", 'applicationId = "chat.fluffy.fluffychat"
 # ne jamais présenter cette signature comme une signature de publication définitive.
 change("android/app/build.gradle.kts", 'signingConfig = signingConfigs.getByName("release")', 'signingConfig = signingConfigs.getByName("debug")')
 change("lib/config/app_config.dart", "static const Color primaryColor = Color(0xFF261386);", "static const Color primaryColor = Color(0xFF4A0050);")
+# Identite et passerelle push specifiques a Le Fil Talk.
+# Le jeton FCM de notre projet ne fonctionne pas avec la passerelle Firebase d'une autre application.
+gateway = os.environ.get("LEFIL_PUSH_GATEWAY_URL", "").strip()
+parsed = urlparse(gateway)
+if (not gateway or parsed.scheme != "https" or not parsed.netloc
+        or parsed.username or parsed.password or parsed.query or parsed.fragment
+        or parsed.path != "/_matrix/push/v1/notify"
+        or parsed.hostname == "push.fluffychat.im"):
+    raise RuntimeError("Passerelle push Le Fil HTTPS dediee obligatoire : refuse de compiler sans configuration")
+change("lib/config/app_config.dart",
+       "static const String pushNotificationsAppId = 'chat.fluffy.fluffychat';",
+       "static const String pushNotificationsAppId = 'net.lefil.talk';")
+change("lib/config/setting_keys.dart",
+       "'https://push.fluffychat.im/_matrix/push/v1/notify',",
+       f"'{gateway}',")
+
 # Nom visible dans l'interface (distinct du libellé Android dans le manifeste).
 change("lib/config/setting_keys.dart",
        "applicationName<String>('chat.fluffy.application_name', 'FluffyChat'),",
