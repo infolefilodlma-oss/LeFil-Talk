@@ -17,6 +17,10 @@ def stop(message):
     raise SystemExit("FCM PREFLIGHT FAILED: " + message)
 
 raw = os.environ.get("LEFIL_FIREBASE_ANDROID_CONFIG", "").strip()
+if not raw:
+    cfg_path = Path("ci/firebase-android-lefil-debug.json")
+    if cfg_path.is_file():
+        raw = cfg_path.read_text(encoding="utf-8")
 gateway = os.environ.get("LEFIL_PUSH_GATEWAY_URL", "").strip()
 if not raw or not gateway:
     stop("Firebase Android config and Le Fil gateway URL are both required")
