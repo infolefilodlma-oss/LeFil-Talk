@@ -96,6 +96,43 @@ change("lib/config/themes.dart",
        "backgroundColor: isColumnMode ? colorScheme.surface : null,",
        "backgroundColor: const Color(0xFF0C1853),\n        foregroundColor: Colors.white,")
 
+# Ne pas interrompre l'ouverture des discussions par un avertissement cryptographique.
+# Masquer uniquement le SnackBar de 15 secondes ; les etats, cles, controles,
+# reglages et fonctions de verification des appareils restent natifs.
+change("lib/pages/chat_list/chat_list.dart",
+       """    if (client.userDeviceKeys[client.userID!]?.deviceKeys.values.any(
+           (device) => !device.verified && !device.blocked,
+         ) ??
+         false) {
+       late final ScaffoldFeatureController controller;
+       final theme = Theme.of(context);
+       controller = ScaffoldMessenger.of(context).showSnackBar(
+         SnackBar(
+           duration: const Duration(seconds: 15),
+           showCloseIcon: true,
+           backgroundColor: theme.colorScheme.errorContainer,
+           closeIconColor: theme.colorScheme.onErrorContainer,
+           content: Text(
+             L10n.of(context).oneOfYourDevicesIsNotVerified,
+             style: TextStyle(color: theme.colorScheme.onErrorContainer),
+           ),
+           action: SnackBarAction(
+             onPressed: () {
+               controller.close();
+               router.go('/rooms/settings/devices');
+             },
+             textColor: theme.colorScheme.onErrorContainer,
+             label: L10n.of(context).settings,
+           ),
+         ),
+       );
+     }
+""",
+       "")
+change("lib/pages/chat_list/chat_list.dart",
+       "    final router = GoRouter.of(context);\n    final client = Matrix.of(context).client;\n    await client.roomsLoading;",
+       "    final client = Matrix.of(context).client;\n    await client.roomsLoading;")
+
 # Poppins 400/500/700 : pour une identité cohérente tout en gardant les composants natifs.
 fonts = root / "assets/fonts"
 fonts.mkdir(parents=True, exist_ok=True)
