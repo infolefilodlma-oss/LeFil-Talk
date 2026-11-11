@@ -66,19 +66,19 @@ change("lib/config/themes.dart", "seedColor: seed ?? Color(AppSettings.colorSche
 # Conserver les menus, fonctions natives, recherche et interactions existantes.
 change("lib/pages/intro/intro_page.dart",
        "import 'package:fluffychat/widgets/matrix.dart';",
-       "import 'package:fluffychat/widgets/matrix.dart';\\nimport 'package:fluffychat/widgets/lefil_banner.dart';")
+       "import 'package:fluffychat/widgets/matrix.dart';\nimport 'package:fluffychat/widgets/lefil_banner.dart';")
 change("lib/pages/intro/intro_page.dart",
-       "        title: addMultiAccount\\n            ? Text(L10n.of(context).addAccount)\\n            : Text(AppSettings.applicationName.value),",
-       "        title: addMultiAccount\\n            ? Text(L10n.of(context).addAccount)\\n            : const LeFilBanner(compact: true),")
+       "        title: addMultiAccount\n            ? Text(L10n.of(context).addAccount)\n            : Text(AppSettings.applicationName.value),",
+       "        title: addMultiAccount\n            ? Text(L10n.of(context).addAccount)\n            : const LeFilBanner(compact: true),")
 change("lib/pages/intro/intro_page.dart",
        "        centerTitle: true,",
-       "        centerTitle: true,\\n        titleSpacing: 0,\\n        toolbarHeight: 72,")
+       "        centerTitle: true,\n        titleSpacing: 0,\n        toolbarHeight: 72,")
 change("lib/pages/chat_list/chat_list_view.dart",
        "import 'package:fluffychat/pages/chat_list/start_chat_fab.dart';",
-       "import 'package:fluffychat/pages/chat_list/start_chat_fab.dart';\\nimport 'package:fluffychat/widgets/lefil_banner.dart';")
+       "import 'package:fluffychat/pages/chat_list/start_chat_fab.dart';\nimport 'package:fluffychat/widgets/lefil_banner.dart';")
 change("lib/pages/chat_list/chat_list_view.dart",
        "                    child: ChatListViewBody(controller),",
-       "                    child: Column(\\n                      children: [\\n                        const SafeArea(\\n                          bottom: false,\\n                          child: LeFilBanner(),\\n                        ),\\n                        Expanded(child: ChatListViewBody(controller)),\\n                      ],\\n                    ),")
+       "                    child: Column(\n                      children: [\n                        const SafeArea(\n                          bottom: false,\n                          child: LeFilBanner(),\n                        ),\n                        Expanded(child: ChatListViewBody(controller)),\n                      ],\n                    ),")
 
 change("lib/config/themes.dart", "      useMaterial3: true,", "      useMaterial3: true,\n      fontFamily: 'Poppins',")
 # Après une connexion réussie, ouvrir directement les conversations.
