@@ -5,6 +5,7 @@ on:
     paths:
       - ci/prepare_elementx_fcm.py
       - ci/test_prepare_elementx_fcm.py
+      - ci/test_upstream_fcm_compat.py
       - .github/workflows/element-x-fcm-preflight.yml
   workflow_dispatch:
 permissions:
@@ -17,3 +18,13 @@ jobs:
       - uses: actions/checkout@v4
       - name: Verifier les regles de securite FCM avec configuration fictive
         run: python3 ci/test_prepare_elementx_fcm.py
+
+  upstream-integration:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Recuperer uniquement Element X 26.10.1
+        run: git clone --depth 1 --branch v26.10.1 https://github.com/element-hq/element-x-android.git upstream
+      - name: Prouver la compatibilite sur les vrais fichiers, sans secrets
+        run: python3 ci/test_upstream_fcm_compat.py
