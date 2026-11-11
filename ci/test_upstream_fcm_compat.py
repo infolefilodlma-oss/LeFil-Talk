@@ -29,6 +29,13 @@ cfg = {
     }],
 }
 env = os.environ.copy()
+# Test with the registered Le Fil Android application, not a synthetic Firebase project.
+registered = Path("ci/firebase-android-lefil-debug.json")
+if registered.is_file():
+    cfg = json.loads(registered.read_text(encoding="utf-8"))
+    assert cfg["project_info"]["project_id"] == "le-fil-talk"
+    assert cfg["project_info"]["project_number"] == "171609026264"
+    assert any(x.get("client_info", {}).get("android_client_info", {}).get("package_name") == "net.lefil.talk.debug" for x in cfg["client"])
 env["LEFIL_FIREBASE_ANDROID_CONFIG"] = json.dumps(cfg)
 env["LEFIL_PUSH_GATEWAY_URL"] = "https://push.example.org/_matrix/push/v1/notify"
 subprocess.run([sys.executable, "ci/prepare_elementx_fcm.py"], env=env, check=True)
@@ -41,9 +48,9 @@ main = ElementTree.parse(root / tracked[1]).getroot()
 debug = ElementTree.parse(root / tracked[2]).getroot()
 values = {item.attrib["name"]: (item.text or "") for item in main}
 dvals = {item.attrib["name"]: (item.text or "") for item in debug}
-assert values["project_id"] == "le-fil-talk-test"
-assert values["gcm_defaultSenderId"] == "765432109876"
-assert dvals["google_app_id"] == "1:765432109876:android:012345abcdef"
+assert values["project_id"] == cfg["project_info"]["project_id"]
+assert values["gcm_defaultSenderId"] == cfg["project_info"]["project_number"]
+assert dvals["google_app_id"] == cfg["client"][0]["client_info"]["mobilesdk_app_id"]
 assert "vector-alpha" not in (root / tracked[1]).read_text()
 source = (root / tracked[3]).read_text()
 assert 'https://push.example.org/_matrix/push/v1/notify' in source
