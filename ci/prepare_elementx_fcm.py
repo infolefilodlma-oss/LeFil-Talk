@@ -54,7 +54,7 @@ source = root / "libraries/pushproviders/firebase/src/main/kotlin/io/element/and
 config = root / "plugins/src/main/kotlin/config/BuildTimeConfig.kt"
 original = {p: p.read_text(encoding="utf-8") for p in (main, debug, source, config)}
 required = {
-    main: "vector-alpha",
+    main: 'name="project_id"',
     debug: "912726360885",
     source: 'const val PUSHER_HTTP_URL: String = "https://matrix.org/_matrix/push/v1/notify"',
     config: 'val PUSHER_APP_ID_DEBUG: String? = null',
