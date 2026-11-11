@@ -1,0 +1,90 @@
+name: Le Fil Talk - Element X FCM (essai protege)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lefil-elementx-fcm-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  android:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - name: Sources Le Fil Talk
+        uses: actions/checkout@v4
+      - name: Bloquer toute compilation sans configuration FCM propre au Fil
+        env:
+          LEFIL_FIREBASE_ANDROID_CONFIG: ${{ secrets.LEFIL_FIREBASE_ANDROID_CONFIG }}
+          LEFIL_PUSH_GATEWAY_URL: ${{ secrets.LEFIL_PUSH_GATEWAY_URL }}
+        run: |
+          set -euo pipefail
+          test -n "$LEFIL_FIREBASE_ANDROID_CONFIG" || { echo "::error::Configurer le secret LEFIL_FIREBASE_ANDROID_CONFIG"; exit 1; }
+          test -n "$LEFIL_PUSH_GATEWAY_URL" || { echo "::error::Configurer le secret LEFIL_PUSH_GATEWAY_URL"; exit 1; }
+          python3 -m py_compile ci/prepare_elementx_fcm.py
+          echo "Prérequis présents (fonctionnement réel des notifications non encore prouvé)"
+      - name: Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: SDK Android
+        uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+      - name: Cloner la version officielle verrouillée
+        run: |
+          set -euo pipefail
+          git clone --depth 1 --branch v26.10.1 https://github.com/element-hq/element-x-android.git upstream
+          git -C upstream rev-parse HEAD | tee upstream-commit.txt
+      - name: Conserver les composants natifs et appliquer seulement l'identité
+        run: |
+          set -euo pipefail
+          python3 -m pip install --user Pillow==11.3.0
+          python3 tools/brand_candidate.py
+          python3 tools/apply_visual_brand.py
+          python3 tools/apply_poppins.py
+          python3 tools/apply_theme_colors.py
+      - name: Configurer exclusivement Firebase et la passerelle autorisée du Fil
+        env:
+          LEFIL_FIREBASE_ANDROID_CONFIG: ${{ secrets.LEFIL_FIREBASE_ANDROID_CONFIG }}
+          LEFIL_PUSH_GATEWAY_URL: ${{ secrets.LEFIL_PUSH_GATEWAY_URL }}
+        run: |
+          set -euo pipefail
+          python3 ci/prepare_elementx_fcm.py
+          grep -F 'net.lefil.talk.debug' upstream/plugins/src/main/kotlin/config/BuildTimeConfig.kt
+          ! grep -R -q 'vector-alpha' upstream/libraries/pushproviders/firebase/src/main/res/values/firebase.xml
+      - name: Compiler APK Google Play FCM (DEBUG seulement)
+        working-directory: upstream
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon --no-configuration-cache :app:assembleGplayDebug
+      - name: Vérifier le paquet, la signature et l'empreinte
+        run: |
+          set -euo pipefail
+          APK=upstream/app/build/outputs/apk/gplay/debug/app-gplay-arm64-v8a-debug.apk
+          test -s "$APK"
+          AAPT="$(find "$ANDROID_HOME/build-tools" -name aapt -type f | sort -V | tail -1)"
+          APKSIGNER="$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -1)"
+          "$AAPT" dump badging "$APK" | grep '^package:' | tee apk-identity.txt
+          grep -F "name='net.lefil.talk.debug'" apk-identity.txt
+          "$AAPT" dump badging "$APK" | grep '^application-label:' | tee apk-label.txt
+          grep -Fx "application-label:'Le Fil Talk'" apk-label.txt
+          "$APKSIGNER" verify --verbose "$APK" | tee apk-signature.txt
+          sha256sum "$APK" | tee apk-sha256.txt
+      - name: Archiver APK test et preuves, SANS publier aux adhérents
+        uses: actions/upload-artifact@v4
+        with:
+          name: lefil-elementx-gplay-fcm-candidat-non-valide
+          path: |
+            upstream/app/build/outputs/apk/gplay/debug/app-gplay-arm64-v8a-debug.apk
+            upstream-commit.txt
+            apk-identity.txt
+            apk-label.txt
+            apk-signature.txt
+            apk-sha256.txt
+          if-no-files-found: error
