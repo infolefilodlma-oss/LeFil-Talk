@@ -1,0 +1,13 @@
+# YunoHost: integrate only after reviewing the ACTUAL managed nginx vhost.
+# For the validated hostname push.le-fil.net (not provisioned automatically).
+location = /_matrix/push/v1/notify {
+    limit_except POST { deny all; }
+    client_max_body_size 64k;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-Proto https;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_pass http://127.0.0.1:5000;
+    proxy_connect_timeout 5s;
+    proxy_read_timeout 30s;
+}
