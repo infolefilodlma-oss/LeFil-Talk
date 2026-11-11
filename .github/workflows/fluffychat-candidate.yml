@@ -25,6 +25,27 @@ jobs:
         uses: actions/checkout@v4
       - name: Vérifier le script avant clonage
         run: python3 -m py_compile tools/brand_fluffychat.py
+      - name: Vérifier prérequis obligatoires des notifications avant compilation
+        env:
+          GOOGLE_SERVICES_JSON_B64: ${{ secrets.GOOGLE_SERVICES_JSON }}
+          LEFIL_PUSH_GATEWAY_URL: ${{ vars.LEFIL_PUSH_GATEWAY_URL }}
+        run: |
+          set -euo pipefail
+          if [ -z "$GOOGLE_SERVICES_JSON_B64" ] || [ -z "$LEFIL_PUSH_GATEWAY_URL" ]; then
+            echo "::error::Livraison bloquee. Firebase ET passerelle push dediee Le Fil obligatoires ; ancienne APK conservee."
+            exit 1
+          fi
+          python3 - <<'PY'
+          import os
+          from urllib.parse import urlparse
+          gateway = os.environ["LEFIL_PUSH_GATEWAY_URL"].strip()
+          u = urlparse(gateway)
+          if (u.scheme != "https" or not u.netloc or u.username or u.password
+                  or u.query or u.fragment or u.path != "/_matrix/push/v1/notify"
+                  or u.hostname == "push.fluffychat.im"):
+              raise SystemExit("Configuration de la passerelle push Le Fil invalide")
+          print("Preconfiguration push complete : reste a valider sur telephone.")
+          PY
       - name: Télécharger FluffyChat officiel version verrouillée
         run: |
           set -euo pipefail
@@ -33,6 +54,8 @@ jobs:
       - name: Préparer les images et polices
         run: python3 -m pip install --user Pillow
       - name: Personnaliser uniquement l'identité Le Fil Talk
+        env:
+          LEFIL_PUSH_GATEWAY_URL: ${{ vars.LEFIL_PUSH_GATEWAY_URL }}
         run: python3 tools/brand_fluffychat.py
       - name: Installer Flutter officiel compatible avec FluffyChat
         uses: subosito/flutter-action@v2
