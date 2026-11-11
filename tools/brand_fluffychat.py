@@ -65,7 +65,7 @@ for route in (
 # En-tête bleu du Fil, tout en conservant l'ergonomie et les composants natifs FluffyChat.
 change("lib/config/themes.dart",
        "backgroundColor: isColumnMode ? colorScheme.surface : null,",
-       "backgroundColor: const Color(0xFF0C1853),\\n        foregroundColor: Colors.white,")
+       "backgroundColor: const Color(0xFF0C1853),\n        foregroundColor: Colors.white,")
 
 # Poppins 400/500/700 : pour une identité cohérente tout en gardant les composants natifs.
 fonts = root / "assets/fonts"
