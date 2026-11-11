@@ -68,3 +68,24 @@ G. **Distribution** : conservation SHA de l'APK et de la signature ; installer e
 | Livraison adhérents | REFUSÉE en l'état |
 
 **Règle de passage** : toute correction attend ces preuves ; chaque contrôle sera exécuté par le développeur avec les outils disponibles, et l'utilisateur ne sera sollicité que pour l'essai physique irréductible.
+
+
+## Recherches vérifiées — 11 novembre 2026 (documentation et tickets développeurs)
+Sources consultées, précisément datées, pour ne plus improviser :
+- Architecture des notifications (éditeur) : https://fluffychat.im/privacy/ — le serveur Matrix envoie à une passerelle push qui transmet à FCM ; activer l'API Firebase dans l'APK sans passerelle et autorisation correspondantes ne prouve rien.
+- Spécification Matrix Push Gateway : https://spec.matrix.org/latest/push-gateway-api/ — route POST `/_matrix/push/v1/notify` et contrat homeserver/passerelle.
+- Ticket FluffyChat #3385 (ouvert) : https://github.com/krille-chan/fluffychat/issues/3385 — sélection automatique FCM/UnifiedPush problématique quand plusieurs distributeurs sont présents ; bien tester les cas sans fournisseur.
+- Plan de tests créé par les développeurs, ticket #3676 : https://github.com/krille-chan/fluffychat/issues/3676 — réception push en arrière-plan/terminé, messages, médias, connexion et autres parcours ; **adopter comme liste de contrôle de base**, la compléter avec nos objectifs.
+- Ticket #3908 (ouvert) : https://github.com/krille-chan/fluffychat/issues/3908 — appel audio pouvant activer la caméra et dysfonctionnement du capteur de proximité ; tests obligatoires « appel audio sans activation caméra » et appareil contre l'oreille.
+- Annonce de l'équipe FluffyChat 11 septembre : https://matrix.org/blog/2026/09/11/this-week-in-matrix-2026-09-11/ — MatrixRTC/LiveKit demande l'annonce du support RTC par le serveur, matrix.org était donné comme compatible ; vérifier à l'exécution.
+- Changelog officiel : https://github.com/krille-chan/fluffychat/blob/main/CHANGELOG.md — v2.11 corrige notamment l'audio d'appel et le comportement des notifications ; **ne pas recréer un appel personnalisé**.
+- Ticket #3047 (ouvert) : https://github.com/krille-chan/fluffychat/issues/3047 — récupération de clé et second compte problématiques ; aucune réinitialisation automatique autorisée.
+- FAQ officielle : https://fluffy.chat/faq/ — sans clé de récupération, les anciens messages chiffrés peuvent devenir indéchiffrables. « Chiffrement plus tard » signifie **parcours initial simplifié**, jamais suppression des clés ou réinitialisation silencieuse.
+- Référence fonctionnalités Matrix officielle : https://www.matrix.org/ecosystem/clients/fluffychat/ — appels 1:1 mentionnés comme stables ; MatrixRTC expérimental.
+
+### Contrôles bloquants ajoutés aux résultats upstream
+1. Réception d'une notification avec appli arrière-plan, terminée, écran verrouillé ; contrôle du pusher enregistré et du bon fournisseur (tickets #3385 et #3676). Aucun effacement cosmétique de l'alerte.
+2. Audio : personne A appelle B et inversement ; aucune caméra ne s'allume spontanément, capteur de proximité vérifié (ticket #3908). Vidéo : réception, image et son bidirectionnels ; test de fin d'appel.
+3. Vérification des clés : compte neuf versus compte existant, ne pas confondre ignorer une étape facultative avec perdre les clés ; consigner tout cas de message illisible (#3047).
+4. Tester les parcours de la version originale (sans notre personnalisation) quand c'est nécessaire pour distinguer bug upstream et régression Le Fil.
+5. Accepter un correctif uniquement avec une source, une preuve de la cause, une preuve de compilation et une preuve de comportement sur téléphone ; sinon **NON VALIDÉ**.
