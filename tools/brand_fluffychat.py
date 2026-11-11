@@ -7,8 +7,6 @@ import hashlib
 
 root = Path("fluffychat")
 # Le composant graphique est versionne separément; aucune dependance serveur.
-from shutil import copyfile
-copyfile(Path("tools/lefil_banner.dart"), root / "lib/widgets/lefil_banner.dart")
 def change(path, old, new):
     p = root / path
     source = p.read_text(encoding="utf-8")
@@ -62,24 +60,8 @@ change("lib/pages/intro/intro_page.dart",
        "child: Text('Se connecter'),")
 
 change("lib/config/themes.dart", "seedColor: seed ?? Color(AppSettings.colorSchemeSeedInt.value),", "seedColor: const Color(0xFF4A0050),")
-# Bandeau identitaire uniquement sur l'accueil et la liste des discussions.
-# Conserver les menus, fonctions natives, recherche et interactions existantes.
-change("lib/pages/intro/intro_page.dart",
-       "import 'package:fluffychat/widgets/matrix.dart';",
-       "import 'package:fluffychat/widgets/matrix.dart';\nimport 'package:fluffychat/widgets/lefil_banner.dart';")
-change("lib/pages/intro/intro_page.dart",
-       "        title: addMultiAccount\n            ? Text(L10n.of(context).addAccount)\n            : Text(AppSettings.applicationName.value),",
-       "        title: addMultiAccount\n            ? Text(L10n.of(context).addAccount)\n            : const LeFilBanner(compact: true),")
-change("lib/pages/intro/intro_page.dart",
-       "        centerTitle: true,",
-       "        centerTitle: true,\n        titleSpacing: 0,\n        toolbarHeight: 72,")
-change("lib/pages/chat_list/chat_list_view.dart",
-       "import 'package:fluffychat/pages/chat_list/start_chat_fab.dart';",
-       "import 'package:fluffychat/pages/chat_list/start_chat_fab.dart';\nimport 'package:fluffychat/widgets/lefil_banner.dart';")
-change("lib/pages/chat_list/chat_list_view.dart",
-       "                    child: ChatListViewBody(controller),",
-       "                    child: Column(\n                      children: [\n                        const SafeArea(\n                          bottom: false,\n                          child: LeFilBanner(),\n                        ),\n                        Expanded(child: ChatListViewBody(controller)),\n                      ],\n                    ),")
-
+# Conserver les en-tetes et menus natifs de FluffyChat : aucun bandeau ajouté.
+# Le logo et le lien Soutenir Le Fil restent accessibles via le menu natif.
 change("lib/config/themes.dart", "      useMaterial3: true,", "      useMaterial3: true,\n      fontFamily: 'Poppins',")
 # Après une connexion réussie, ouvrir directement les conversations.
 # La sauvegarde / vérification cryptographique reste disponible dans Réglages > Sauvegarde.
