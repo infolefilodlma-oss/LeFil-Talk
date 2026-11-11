@@ -73,10 +73,7 @@ for route in (
 ):
     change(route, "context.go('/backup');", "context.go('/rooms');")
 
-# En-tête bleu du Fil, tout en conservant l'ergonomie et les composants natifs FluffyChat.
-change("lib/config/themes.dart",
-       "backgroundColor: isColumnMode ? colorScheme.surface : null,",
-       "backgroundColor: const Color(0xFF0C1853),\n        foregroundColor: Colors.white,")
+# En-têtes et contraste des écrans : laisser FluffyChat gérer le thème natif.
 
 # Ne pas interrompre l'ouverture des discussions par un avertissement cryptographique.
 # Masquer uniquement le SnackBar de 15 secondes ; les etats, cles, controles,
