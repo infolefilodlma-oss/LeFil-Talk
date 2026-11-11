@@ -27,6 +27,14 @@ change("lib/config/app_config.dart", "static const Color primaryColor = Color(0x
 change("lib/config/setting_keys.dart",
        "applicationName<String>('chat.fluffy.application_name', 'FluffyChat'),",
        "applicationName<String>('chat.fluffy.application_name', 'Le Fil Talk'),")
+# Menu de soutien : adapter uniquement le texte visible et la destination du lien.
+# Le fonctionnement du menu et les autres liens FluffyChat restent inchangés.
+change("lib/pages/chat_list/client_chooser_button.dart",
+       "Text(L10n.of(context).supportFluffyChat),",
+       "Text('Soutenir Le Fil'),")
+change("lib/pages/chat_list/client_chooser_button.dart",
+       "'https://ko-fi.com/post/How-can-I-support-FluffyChat-J2G325WE6I',",
+       "'https://le-fil.net/soutenir.html',")
 # Accueil: supprimer la publicité technique Matrix et l'anglais de l'écran initial.
 # Conserver les boutons et les parcours natifs de connexion et inscription.
 change("lib/pages/intro/intro_page.dart",
