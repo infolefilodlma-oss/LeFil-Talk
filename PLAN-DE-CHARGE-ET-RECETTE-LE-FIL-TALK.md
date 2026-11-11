@@ -10,6 +10,19 @@ Statut : plan de pilotage, non preuve de livraison.
 - **Point d'arrêt :** à la première anomalie, suspendre les changements, revenir à l'état stable ciblé si nécessaire, corriger la cause démontrée et vérifier. Ne jamais lancer une nouvelle modification avant d'avoir diagnostiqué la précédente.
 - **Travail vérifié plutôt que temps passé :** chaque étape se termine avec une preuve et un critère GO/NO-GO. Aucun succès de compilation ne vaut validation du produit.
 
+## PRIORITÉ ABSOLUE — supprimer le frein à l'inscription (décision utilisateur)
+**Aucune nouvelle livraison aux adhérents avant validation de l'inscription et de la première connexion.** La réussite de la compilation, des icônes ou de l'émulateur ne compense pas un parcours d'accès bloquant.
+
+Critères d'acceptation sur téléphone :
+1. Depuis la première ouverture, proposer clairement « Créer mon compte » et « J'ai déjà un compte », sans choix de fournisseur Matrix ni jargon technique préalable.
+2. Utiliser matrix.org en arrière-plan sans le présenter comme une étape de choix ; ne pas promettre de masquer le domaine lorsqu'une authentification extérieure doit légalement/techniquement l'afficher.
+3. Inscription possible de bout en bout, puis arrivée dans l'application, sans création de salons artificiels.
+4. Accès aux salons non chiffrés **sans vérification d'identité ni récupération de clé cryptographique imposées** ; si le fournisseur exige une authentification ou des contrôles de sécurité, ne jamais prétendre pouvoir les contourner.
+5. Vérifier aussi le retour d'un adhérent déjà inscrit et le comportement après fermeture/réouverture.
+6. Tester en conditions réelles (Android, compte neuf et existant) ; documenter les étapes et le résultat avec captures. **NO-GO si l'une échoue.**
+
+**Risque de configuration confirmé dans le code amont v2.11.5** : définir simplement `AppSettings.presetHomeserver` masque le bouton natif « Créer un compte » dans `intro_page.dart` lorsque `hasPresetHomeserver` est vrai. Il ne faut donc PAS appliquer ce paramètre seul. Une personnalisation du routage de création et connexion, respectant le fournisseur et ses contraintes, doit être testée avant d'être retenue.
+
 ## Dépendances et plan de charge (ordre strict)
 | Lot | Intervention | Contrôles avant travail | Preuve / condition de sortie | État |
 |---|---|---|---|---|
