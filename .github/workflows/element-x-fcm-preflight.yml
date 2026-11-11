@@ -1,0 +1,19 @@
+name: Le Fil Talk - tests securite Firebase sans compilation
+on:
+  push:
+    branches: [element-x-matrixorg-reprise]
+    paths:
+      - ci/prepare_elementx_fcm.py
+      - ci/test_prepare_elementx_fcm.py
+      - .github/workflows/element-x-fcm-preflight.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verifier les regles de securite FCM avec configuration fictive
+        run: python3 ci/test_prepare_elementx_fcm.py
