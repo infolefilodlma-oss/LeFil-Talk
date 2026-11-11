@@ -52,6 +52,21 @@ change("lib/pages/intro/intro_page.dart",
 
 change("lib/config/themes.dart", "seedColor: seed ?? Color(AppSettings.colorSchemeSeedInt.value),", "seedColor: const Color(0xFF4A0050),")
 change("lib/config/themes.dart", "      useMaterial3: true,", "      useMaterial3: true,\n      fontFamily: 'Poppins',")
+# Après une connexion réussie, ouvrir directement les conversations.
+# La sauvegarde / vérification cryptographique reste disponible dans Réglages > Sauvegarde.
+# NE PAS supprimer le chiffrement, les clés, ni l'écran de sauvegarde ; il devient facultatif à l'arrivée.
+for route in (
+    "lib/pages/login/login.dart",
+    "lib/pages/intro/intro_page_presenter.dart",
+    "lib/utils/sign_in_flows/check_homeserver.dart",
+):
+    change(route, "context.go('/backup');", "context.go('/rooms');")
+
+# En-tête bleu du Fil, tout en conservant l'ergonomie et les composants natifs FluffyChat.
+change("lib/config/themes.dart",
+       "backgroundColor: isColumnMode ? colorScheme.surface : null,",
+       "backgroundColor: const Color(0xFF0C1853),\\n        foregroundColor: Colors.white,")
+
 # Poppins 400/500/700 : pour une identité cohérente tout en gardant les composants natifs.
 fonts = root / "assets/fonts"
 fonts.mkdir(parents=True, exist_ok=True)
