@@ -1,0 +1,20 @@
+# Runs only on the existing VPS after validation of available resources.
+# Port 5000 is intentionally NOT exposed to the Internet.
+services:
+  sygnal:
+    image: matrixdotorg/sygnal:latest
+    container_name: lefil-talk-sygnal
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:5000:5000"
+    volumes:
+      - /opt/lefil-talk-sygnal/config:/sygnal:ro
+    environment:
+      SYGNAL_CONF: /sygnal/sygnal.yaml
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"
