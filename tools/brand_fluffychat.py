@@ -57,6 +57,15 @@ change("lib/pages/intro/intro_page.dart",
        "                            padding: const EdgeInsets.all(32.0),\n                            child: Hero(",
        "                            padding: const EdgeInsets.fromLTRB(24, 56, 24, 40),\n                            child: Hero(")
 
+# Logo rond horizontalement centre, dans le tiers superieur de l'accueil.
+# Respecter la respiration visuelle sans recouvrir ni ecraser les textes.
+change("lib/pages/intro/intro_page.dart",
+       "                                  width: 128,\n                                  height: 128,",
+       "                                  width: 164,\n                                  height: 164,")
+change("lib/pages/intro/intro_page.dart",
+       "                          Text(\n                            L10n.of(context).appSubtitle,\n                            textAlign: TextAlign.center,\n                            style: TextStyle(fontSize: 20),\n                          ),",
+       "                          Padding(\n                            padding: const EdgeInsets.symmetric(horizontal: 28),\n                            child: Text(\n                              L10n.of(context).appSubtitle,\n                              textAlign: TextAlign.center,\n                              style: TextStyle(fontSize: 20),\n                            ),\n                          ),")
+
 # Premier écran destiné aux adhérents francophones : texte compact, lisible,
 # sans libellés anglais ni formulaires techniques ajoutés.
 change("lib/pages/intro/intro_page.dart",
