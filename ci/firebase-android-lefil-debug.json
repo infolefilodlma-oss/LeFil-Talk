@@ -1,0 +1,24 @@
+{
+  "project_info": {
+    "project_number": "171609026264",
+    "project_id": "le-fil-talk",
+    "storage_bucket": "le-fil-talk.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:171609026264:android:9664bdf8bcbbfeb05671ad",
+        "android_client_info": {
+          "package_name": "net.lefil.talk.debug"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC02txS9MpMxutWtPcrK6vh5uSecE8yDFU"
+        }
+      ]
+    }
+  ],
+  "configuration_version": "1"
+}
