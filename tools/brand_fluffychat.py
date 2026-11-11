@@ -101,32 +101,32 @@ change("lib/config/themes.dart",
 # reglages et fonctions de verification des appareils restent natifs.
 change("lib/pages/chat_list/chat_list.dart",
        """    if (client.userDeviceKeys[client.userID!]?.deviceKeys.values.any(
-           (device) => !device.verified && !device.blocked,
-         ) ??
-         false) {
-       late final ScaffoldFeatureController controller;
-       final theme = Theme.of(context);
-       controller = ScaffoldMessenger.of(context).showSnackBar(
-         SnackBar(
-           duration: const Duration(seconds: 15),
-           showCloseIcon: true,
-           backgroundColor: theme.colorScheme.errorContainer,
-           closeIconColor: theme.colorScheme.onErrorContainer,
-           content: Text(
-             L10n.of(context).oneOfYourDevicesIsNotVerified,
-             style: TextStyle(color: theme.colorScheme.onErrorContainer),
-           ),
-           action: SnackBarAction(
-             onPressed: () {
-               controller.close();
-               router.go('/rooms/settings/devices');
-             },
-             textColor: theme.colorScheme.onErrorContainer,
-             label: L10n.of(context).settings,
-           ),
-         ),
-       );
-     }
+          (device) => !device.verified && !device.blocked,
+        ) ??
+        false) {
+      late final ScaffoldFeatureController controller;
+      final theme = Theme.of(context);
+      controller = ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          duration: const Duration(seconds: 15),
+          showCloseIcon: true,
+          backgroundColor: theme.colorScheme.errorContainer,
+          closeIconColor: theme.colorScheme.onErrorContainer,
+          content: Text(
+            L10n.of(context).oneOfYourDevicesIsNotVerified,
+            style: TextStyle(color: theme.colorScheme.onErrorContainer),
+          ),
+          action: SnackBarAction(
+            onPressed: () {
+              controller.close();
+              router.go('/rooms/settings/devices');
+            },
+            textColor: theme.colorScheme.onErrorContainer,
+            label: L10n.of(context).settings,
+          ),
+        ),
+      );
+    }
 """,
        "")
 change("lib/pages/chat_list/chat_list.dart",
