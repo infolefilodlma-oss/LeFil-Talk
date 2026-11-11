@@ -1,0 +1,55 @@
+name: Le Fil Talk - publier APK Element X FCM de test
+
+on:
+  push:
+    branches: [element-x-matrixorg-reprise]
+    paths:
+      - '.github/workflows/publish-elementx-fcm-test.yml'
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Récupérer l'APK d'une compilation vérifiée
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          gh run download 43063330080 --name lefil-elementx-gplay-fcm-candidat-non-valide --dir artefact
+          find artefact -type f -name '*.apk' -print
+      - name: Vérifier nom, structure, taille et signature de l'APK
+        run: |
+          set -euo pipefail
+          mapfile -t candidates < <(find artefact -type f -name 'app-gplay-arm64-v8a-debug.apk')
+          test "${#candidates[@]}" -eq 1
+          src="${candidates[0]}"
+          test "$(stat -c%s "$src")" -gt 30000000
+          python3 - "$src" <<'PY'
+          import sys,zipfile
+          with zipfile.ZipFile(sys.argv[1]) as z:
+              assert z.testzip() is None and 'AndroidManifest.xml' in z.namelist()
+          PY
+          cp "$src" Le-Fil-Talk-Element-X-FCM-TEST.apk
+          sha256sum Le-Fil-Talk-Element-X-FCM-TEST.apk | tee apk-sha256.txt
+      - name: Publier exclusivement comme préversion technique non opérationnelle
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          tag=lefil-elementx-fcm-debug-20261111
+          if gh release view "$tag" >/dev/null 2>&1; then
+              echo "::error::La publication existe déjà ; ne pas écraser"
+              exit 1
+          fi
+          gh release create "$tag" Le-Fil-Talk-Element-X-FCM-TEST.apk apk-sha256.txt \
+            --title "Le Fil Talk - Element X - essai technique FCM (non validé)" \
+            --notes "APK de test debug compilée via GitHub Actions 43063330080, Element X v26.10.1, projet Firebase Le Fil Talk. La passerelle Sygnal n'est PAS ENCORE INSTALLÉE : LES NOTIFICATIONS NE FONCTIONNENT PAS ENCORE. Pas de diffusion aux adhérents ni de mise à jour de production. Tests à faire sur téléphone : ouverture, connexion, messages, appels et notifications après installation de la passerelle." \
+            --prerelease --latest=false
+          gh release view "$tag" --json url,assets
