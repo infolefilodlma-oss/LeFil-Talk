@@ -75,5 +75,88 @@ new_text = """                Text(
                 )"""
 assert src.count(old_text) == 1, "Ancrage accueil Element X inattendu"
 src = src.replace(old_text, new_text)
+
+old_buttons = """    ButtonColumnMolecule {
+        val signInButtonStringRes = if (state.canLoginWithQrCode || state.canCreateAccount) {
+            R.string.screen_onboarding_sign_in_manually
+        } else {
+            CommonStrings.action_continue
+        }
+        if (state.canLoginWithQrCode) {
+            Button(
+                text = stringResource(id = R.string.screen_onboarding_sign_in_with_qr_code),
+                leadingIcon = IconSource.Vector(CompoundIcons.QrCode()),
+                onClick = onSignInWithQrCode,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+        val defaultAccountProvider = state.defaultAccountProvider
+        if (defaultAccountProvider == null) {
+            Button(
+                text = stringResource(id = signInButtonStringRes),
+                onClick = {
+                    onSignIn(state.mustChooseAccountProvider)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag(TestTags.onBoardingSignIn)
+            )
+        } else {
+            Button(
+                text = stringResource(id = R.string.screen_onboarding_sign_in_to, defaultAccountProvider.friendlyServerName()),
+                showProgress = isLoading,
+                onClick = {
+                    state.eventSink(OnBoardingEvent.OnSignIn(defaultAccountProvider))
+                },
+                enabled = state.submitEnabled || isLoading,
+                modifier = Modifier
+                    .fillMaxWidth()
+            )
+        }
+        if (state.canCreateAccount) {
+            TextButton(
+                text = stringResource(id = R.string.screen_onboarding_sign_up),
+                onClick = onCreateAccount,
+                modifier = Modifier
+                    .fillMaxWidth()
+            )
+        }
+"""
+new_buttons = """    ButtonColumnMolecule {
+        val defaultAccountProvider = state.defaultAccountProvider
+        if (state.canCreateAccount) {
+            Button(
+                text = "Je crée mon compte gratuit",
+                onClick = onCreateAccount,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+        if (defaultAccountProvider == null) {
+            TextButton(
+                text = "J'ai déjà un compte",
+                onClick = { onSignIn(state.mustChooseAccountProvider) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag(TestTags.onBoardingSignIn)
+            )
+        } else {
+            TextButton(
+                text = "J'ai déjà un compte",
+                onClick = { state.eventSink(OnBoardingEvent.OnSignIn(defaultAccountProvider)) },
+                enabled = state.submitEnabled || isLoading,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+        if (state.canLoginWithQrCode) {
+            Button(
+                text = stringResource(id = R.string.screen_onboarding_sign_in_with_qr_code),
+                leadingIcon = IconSource.Vector(CompoundIcons.QrCode()),
+                onClick = onSignInWithQrCode,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+"""
+assert src.count(old_buttons) == 1, "Ancrage des boutons d'accueil Element X inattendu"
+src = src.replace(old_buttons, new_buttons)
 path.write_text(src, encoding="utf-8")
-print("Accueil Le Fil Talk applique : logo officiel, Papote, Sentiers, Oasis, matrix.org.")
+print("Accueil Le Fil Talk applique : logo officiel, création de compte prioritaire, connexion native secondaire, QR conservé.")

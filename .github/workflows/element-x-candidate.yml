@@ -58,6 +58,15 @@ jobs:
         run: python3 tools/apply_poppins.py
       - name: Appliquer les couleurs natives Le Fil Talk (clair/sombre)
         run: python3 tools/apply_theme_colors.py
+      - name: Appliquer l'accueil et l'accompagnement Le Fil Talk
+        run: |
+          set -euo pipefail
+          python3 tools/apply_lefil_welcome.py
+          python3 tools/apply_signup_help.py
+      - name: Appliquer la navigation Le Fil sans inventer de salons
+        run: python3 tools/apply_lefil_navigation.py
+      - name: Vérifier les transformations sur les sources Element X
+        run: python3 tools/verify_lefil_transformations.py
       - name: Vérifier la validité des fonds du logo adaptatif
         run: |
           python3 - <<'PY'

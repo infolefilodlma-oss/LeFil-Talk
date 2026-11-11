@@ -6,6 +6,8 @@ on:
     branches: [element-x-matrixorg-reprise]
     paths:
       - '.github/workflows/element-x-gplay-fcm.yml'
+      - 'tools/**'
+      - 'LogoLeFilTalk.png'
 
 permissions:
   contents: read
@@ -52,6 +54,10 @@ jobs:
           python3 tools/apply_visual_brand.py
           python3 tools/apply_poppins.py
           python3 tools/apply_theme_colors.py
+          python3 tools/apply_lefil_welcome.py
+          python3 tools/apply_signup_help.py
+          python3 tools/apply_lefil_navigation.py
+          python3 tools/verify_lefil_transformations.py
       - name: Configurer exclusivement Firebase et la passerelle autorisée du Fil
         env:
           LEFIL_PUSH_GATEWAY_URL: https://push.le-fil.net/_matrix/push/v1/notify

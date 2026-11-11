@@ -39,6 +39,21 @@ require("grep -Fx \"application-label:'Le Fil Talk'\"" in workflow,
 require("git clone --depth 1 --branch v26.10.1" in workflow,
         "version amont verrouillée")
 require("gh release" not in workflow, "pas de publication depuis la compilation diagnostique")
+patch_order = [
+    "python3 tools/brand_candidate.py",
+    "python3 tools/apply_visual_brand.py",
+    "python3 tools/apply_poppins.py",
+    "python3 tools/apply_theme_colors.py",
+    "python3 tools/apply_lefil_welcome.py",
+    "python3 tools/apply_signup_help.py",
+    "python3 tools/apply_lefil_navigation.py",
+    "python3 tools/verify_lefil_transformations.py",
+]
+positions = [workflow.find(command) for command in patch_order]
+require(all(position >= 0 for position in positions),
+        "tous les patches Le Fil Talk sont appelés")
+require(positions == sorted(positions),
+        "ordre des patches : identité, visuel, Poppins, thème, accueil, aide, navigation")
 logo = (root / "LogoLeFilTalk.png").read_bytes()
 require(logo[:8] == bytes.fromhex("89504e470d0a1a0a") and
         len(logo) >= 24 and
