@@ -43,7 +43,7 @@ change("lib/pages/intro/intro_page.dart",
        "'Se relier malgré la distance et la dispersion',")
 change("lib/pages/intro/intro_page.dart",
        "welcomeText ?? L10n.of(context).appDescription,",
-       "welcomeText ?? 'Retrouvez vos échanges et vos groupes, simplement.',")
+       "welcomeText ?? 'Bienvenue sur Le Fil Talk. Retrouvez vos discussions, vos groupes et vos amis.',")
 change("lib/pages/intro/intro_page.dart",
        "L10n.of(context).loginWithMatrixId,",
        "'Autre méthode de connexion',")
@@ -52,6 +52,11 @@ change("lib/pages/intro/intro_page.dart",
 change("lib/pages/intro/intro_page.dart",
        "                          const SizedBox(height: 8),\n                          Padding(",
        "                          const SizedBox(height: 20),\n                          Padding(")
+# Decoller la presentation du bord superieur, sans modifier le texte valide.
+change("lib/pages/intro/intro_page.dart",
+       "                            padding: const EdgeInsets.all(32.0),\n                            child: Hero(",
+       "                            padding: const EdgeInsets.fromLTRB(24, 56, 24, 40),\n                            child: Hero(")
+
 # Premier écran destiné aux adhérents francophones : texte compact, lisible,
 # sans libellés anglais ni formulaires techniques ajoutés.
 change("lib/pages/intro/intro_page.dart",
