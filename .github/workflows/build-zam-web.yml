@@ -1,0 +1,57 @@
+name: Zam Web v1.59.7
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: az4521/Zam
+          ref: cd788b953d7581c43454f74ce4852527fff6beaf
+          persist-credentials: false
+      - name: Verify official source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = cd788b953d7581c43454f74ce4852527fff6beaf
+          node -e 'if (require("./package.json").version !== "1.59.7") process.exit(1)'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Verify and package static Web client
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s build/index.html
+          test -d build/_app/immutable
+          test -n "$(find build/_app/immutable -type f -name '*.js' -print -quit)"
+          test -n "$(find build -type f -name '*.css' -print -quit)"
+          test -z "$(find build -type l -print -quit)"
+          grep -q '_app/' build/index.html
+          tar -czf zam-web-v1.59.7.tar.gz build
+          python3 - <<'PYTHON'
+          import tarfile
+          from pathlib import PurePosixPath
+          with tarfile.open('zam-web-v1.59.7.tar.gz') as archive:
+              members = archive.getmembers()
+              assert all(PurePosixPath(m.name).parts[0] == 'build' and '..' not in PurePosixPath(m.name).parts for m in members)
+              assert all(m.isfile() or m.isdir() for m in members)
+              assert any(m.name == 'build/index.html' and m.size > 0 for m in members)
+              assert any(m.name.startswith('build/_app/immutable/') and m.name.endswith('.js') for m in members)
+          PYTHON
+          sha256sum zam-web-v1.59.7.tar.gz > zam-web-v1.59.7.tar.gz.sha256
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zam-web-v1.59.7-cd788b953d75
+          path: |
+            zam-web-v1.59.7.tar.gz
+            zam-web-v1.59.7.tar.gz.sha256
+          if-no-files-found: error
+          retention-days: 30
