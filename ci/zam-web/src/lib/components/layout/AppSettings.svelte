@@ -342,7 +342,50 @@
             <!-- Mobile root: drill-down category list. -->
             <nav class="flex-1 overflow-y-auto py-2">
                 {#each settingsGroups as group, idx (group.title)}
-                    {#if idx < 2 || (idx === 2 && moreOptionsExpanded)}
+                    {#if idx < 2}
+                        <!-- Account and App groups: always visible -->
+                        <div
+                            class="px-6 pt-4 pb-1 text-xs font-semibold uppercase tracking-wide text-discord-textMuted"
+                        >
+                            {group.title}
+                        </div>
+                        {#each group.tabs as tab (tab.id)}
+                            <button
+                                bind:this={categoryEls[tab.id]}
+                                onclick={() => selectTab(tab.id)}
+                                class="w-full flex items-center justify-between gap-3 px-6 py-3.5 text-start text-base font-medium text-discord-textPrimary hover:bg-discord-messageHover active:bg-discord-messageHover transition-colors"
+                            >
+                                <span class="min-w-0 truncate">{tab.label}</span>
+                                <ChevronRight
+                                    size={20}
+                                    aria-hidden="true"
+                                    class="mirror:-scale-x-100 flex-shrink-0 text-discord-textMuted"
+                                />
+                            </button>
+                        {/each}
+                    {:else if idx === 2 && moreOptionsExpanded}
+                        <!-- Advanced group: shown only when expanded -->
+                        <div
+                            class="px-6 pt-4 pb-1 text-xs font-semibold uppercase tracking-wide text-discord-textMuted"
+                        >
+                            {group.title}
+                        </div>
+                        {#each group.tabs as tab (tab.id)}
+                            <button
+                                bind:this={categoryEls[tab.id]}
+                                onclick={() => selectTab(tab.id)}
+                                class="w-full flex items-center justify-between gap-3 px-6 py-3.5 text-start text-base font-medium text-discord-textPrimary hover:bg-discord-messageHover active:bg-discord-messageHover transition-colors"
+                            >
+                                <span class="min-w-0 truncate">{tab.label}</span>
+                                <ChevronRight
+                                    size={20}
+                                    aria-hidden="true"
+                                    class="mirror:-scale-x-100 flex-shrink-0 text-discord-textMuted"
+                                />
+                            </button>
+                        {/each}
+                    {:else if idx > 2}
+                        <!-- Plugin groups: always visible -->
                         <div
                             class="px-6 pt-4 pb-1 text-xs font-semibold uppercase tracking-wide text-discord-textMuted"
                         >
@@ -364,16 +407,18 @@
                         {/each}
                     {/if}
                 {/each}
-                
-                <!-- "More options" toggle button for mobile -->
-                <button
-                    onclick={() => (moreOptionsExpanded = !moreOptionsExpanded)}
-                    class="w-full flex items-center justify-between gap-3 px-6 py-3.5 text-start text-sm font-medium text-discord-textMuted hover:bg-discord-messageHover active:bg-discord-messageHover transition-colors"
-                >
-                    <span class="min-w-0 truncate">
-                        {moreOptionsExpanded ? "▼" : "▶"} Plus d'options
-                    </span>
-                </button>
+
+                <!-- "Advanced" toggle button for mobile (only show in list view before expansion) -->
+                {#if settingsGroups[2]}
+                    <button
+                        onclick={() => (moreOptionsExpanded = !moreOptionsExpanded)}
+                        class="w-full flex items-center justify-between gap-3 px-6 py-3.5 text-start text-sm font-medium text-discord-textMuted hover:bg-discord-messageHover active:bg-discord-messageHover transition-colors"
+                    >
+                        <span class="min-w-0 truncate">
+                            {moreOptionsExpanded ? "▼" : "▶"} {settingsGroups[2].title}
+                        </span>
+                    </button>
+                {/if}
             </nav>
         {:else if view.mode === "detail"}
             <!-- Mobile sub-page: one category, full screen. -->
@@ -394,7 +439,48 @@
                     class="flex flex-col flex-shrink-0 w-40 gap-0.5 border-e border-discord-divider px-2 py-3 min-h-0 overflow-y-auto overscroll-contain"
                 >
                     {#each settingsGroups as group, idx (group.title)}
-                        {#if idx < 2 || (idx === 2 && moreOptionsExpanded)}
+                        {#if idx < 2}
+                            <!-- Account and App groups: always visible -->
+                            <div
+                                class="px-3 pt-3 pb-1 text-xs font-semibold uppercase tracking-wide text-discord-textMuted"
+                            >
+                                {group.title}
+                            </div>
+                            {#each group.tabs as tab (tab.id)}
+                                <button
+                                    bind:this={sidebarEls[tab.id]}
+                                    onclick={() => selectTab(tab.id)}
+                                    class="flex-shrink-0 w-full whitespace-nowrap text-start px-3 py-2 rounded text-sm font-medium transition-colors"
+                                    class:bg-discord-messageHover={view.tab ===
+                                        tab.id}
+                                    class:text-discord-textPrimary={view.tab ===
+                                        tab.id}
+                                    class:text-discord-textMuted={view.tab !==
+                                        tab.id}>{tab.label}</button
+                                >
+                            {/each}
+                        {:else if idx === 2 && moreOptionsExpanded}
+                            <!-- Advanced group: shown only when expanded -->
+                            <div
+                                class="px-3 pt-3 pb-1 text-xs font-semibold uppercase tracking-wide text-discord-textMuted"
+                            >
+                                {group.title}
+                            </div>
+                            {#each group.tabs as tab (tab.id)}
+                                <button
+                                    bind:this={sidebarEls[tab.id]}
+                                    onclick={() => selectTab(tab.id)}
+                                    class="flex-shrink-0 w-full whitespace-nowrap text-start px-3 py-2 rounded text-sm font-medium transition-colors"
+                                    class:bg-discord-messageHover={view.tab ===
+                                        tab.id}
+                                    class:text-discord-textPrimary={view.tab ===
+                                        tab.id}
+                                    class:text-discord-textMuted={view.tab !==
+                                        tab.id}>{tab.label}</button
+                                >
+                            {/each}
+                        {:else if idx > 2}
+                            <!-- Plugin groups: always visible -->
                             <div
                                 class="px-3 pt-3 pb-1 text-xs font-semibold uppercase tracking-wide text-discord-textMuted"
                             >
@@ -415,14 +501,16 @@
                             {/each}
                         {/if}
                     {/each}
-                    
-                    <!-- "More options" toggle button for desktop -->
-                    <button
-                        onclick={() => (moreOptionsExpanded = !moreOptionsExpanded)}
-                        class="flex-shrink-0 w-full whitespace-nowrap text-start px-3 py-2 rounded text-sm font-medium transition-colors text-discord-textMuted hover:text-discord-textPrimary"
-                    >
-                        {moreOptionsExpanded ? "▼" : "▶"} Plus d'options
-                    </button>
+
+                    <!-- "Advanced" toggle button for desktop -->
+                    {#if settingsGroups[2]}
+                        <button
+                            onclick={() => (moreOptionsExpanded = !moreOptionsExpanded)}
+                            class="flex-shrink-0 w-full whitespace-nowrap text-start px-3 py-2 rounded text-sm font-medium transition-colors text-discord-textMuted hover:text-discord-textPrimary"
+                        >
+                            {moreOptionsExpanded ? "▼" : "▶"} {settingsGroups[2].title}
+                        </button>
+                    {/if}
                 </nav>
 
                 <div class="flex-1 overflow-y-auto p-6 min-w-0">

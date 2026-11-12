@@ -59,7 +59,7 @@ export const SETTINGS_GROUPS: readonly {
         ],
     },
     {
-        title: t("settingsNav.moreOptions") || "Plus d'options",
+        title: t("settingsNav.advanced"),
         tabs: [
             { id: "general", label: t("settingsNav.general") },
             { id: "keybinds", label: t("settingsNav.keybinds") },
