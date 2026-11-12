@@ -1,0 +1,38 @@
+/* Le Fil Talk Phase 2A - Interface Simplification
+   Masks non-essential features and moves them under a "More options" menu.
+   Preserves: Messages, Spaces, Rooms, Calls, Search, Notifications.
+   Hidden (available in More options): Debug, Plugins, Advanced settings.
+*/
+
+/* Hide debug and advanced settings tabs */
+[data-settings-tab="debug"],
+[data-settings-tab="plugins"],
+[data-settings-tab="rich-presence"] {
+    display: none !important;
+}
+
+/* Hide sidebar entries for non-essential features */
+.settings-nav-item[data-tab-id="debug"],
+.settings-nav-item[data-tab-id="plugins"],
+.settings-nav-item[data-tab-id="rich-presence"] {
+    display: none !important;
+}
+
+/* Preserve all security-related alerts and banners */
+[role="alert"],
+.alert,
+.banner,
+.health-banner,
+.security-banner {
+    display: block !important;
+}
+
+/* Ensure calls, search, and notifications remain visible */
+[data-feature="calls"],
+[data-feature="search"],
+[data-feature="notifications"],
+.call-panel,
+.search-panel,
+.notifications-panel {
+    display: block !important;
+}
