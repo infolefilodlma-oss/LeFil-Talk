@@ -1,0 +1,81 @@
+name: Zam Web v1.60.3 - D3 D4
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout Le Fil Talk
+        uses: actions/checkout@v4
+
+      - name: Checkout Zam source commit
+        run: |
+          set -euo pipefail
+          git clone --no-checkout https://github.com/az4521/Zam.git zam
+          git -C zam fetch --depth 1 origin b6a9a5e1c31a7ff614c38ae82de1785d675a06ef
+          git -C zam checkout --detach b6a9a5e1c31a7ff614c38ae82de1785d675a06ef
+          test "$(git -C zam rev-parse HEAD)" = "b6a9a5e1c31a7ff614c38ae82de1785d675a06ef"
+
+      - name: Apply isolated Web Push files only
+        run: |
+          set -euo pipefail
+          cp ci/zam-web/src/lib/webPush.ts zam/src/lib/webPush.ts
+          cp ci/zam-web/src/lib/webPush.test.ts zam/src/lib/webPush.test.ts
+          git -C zam diff --check
+          git -C zam diff -- src/lib/webPush.ts src/lib/webPush.test.ts
+
+      - name: Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: zam/package-lock.json
+
+      - name: npm ci
+        working-directory: zam
+        run: npm ci
+
+      - name: npm run check
+        working-directory: zam
+        run: npm run check
+
+      - name: npm run test
+        working-directory: zam
+        run: npm run test
+
+      - name: npm run lint
+        working-directory: zam
+        run: npm run lint
+
+      - name: npm run build
+        working-directory: zam
+        run: npm run build
+
+      - name: Verify build and archive
+        working-directory: zam
+        run: |
+          set -euo pipefail
+          test -s build/index.html
+          find build -type f | grep -E '\.(js|css|wasm)$' >/dev/null
+          test -s build/manifest.json || test -s build/manifest.webmanifest
+          find build -type f -name '*.wasm' -print
+          tar -czf "zam-web-v1.60.3-b6a9a5e1c31a-webpush-disabled.tar.gz" build
+          sha256sum "zam-web-v1.60.3-b6a9a5e1c31a-webpush-disabled.tar.gz" | tee zam-web.sha256
+          git rev-parse HEAD | tee zam-source-commit.txt
+
+      - name: Upload Zam Web artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: zam-web-v1.60.3-b6a9a5e1c31a-webpush-disabled
+          path: |
+            zam/zam-web-v1.60.3-b6a9a5e1c31a-webpush-disabled.tar.gz
+            zam/zam-web.sha256
+            zam/zam-source-commit.txt
+            zam/build
+          if-no-files-found: error
