@@ -2,6 +2,9 @@ name: Zam Web v1.60.3 - D3 D4
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - zam-d3d4-v1.60.3-webpush-disabled
 
 permissions:
   contents: read
