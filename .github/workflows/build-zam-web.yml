@@ -1,6 +1,10 @@
 name: Zam Web v1.59.7
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/build-zam-web.yml'
 permissions:
   contents: read
 jobs:
