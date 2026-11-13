@@ -6,12 +6,12 @@ vi.mock("@capacitor/core", () => ({
 
 import { initWebPush, webPushConfigured } from "$lib/webPush";
 
-describe("web push disabled build", () => {
-    it("has no effective VAPID key", () => {
-        expect(webPushConfigured()).toBe(false);
+describe("Le Fil Talk configured web push build", () => {
+    it("has an effective public VAPID key", () => {
+        expect(webPushConfigured()).toBe(true);
     });
 
-    it("cannot register a third-party web pusher", async () => {
+    it("does not register when browser push APIs are absent", async () => {
         const setPusher = vi.fn();
         await initWebPush({ setPusher } as never);
         expect(setPusher).not.toHaveBeenCalled();

@@ -23,11 +23,11 @@ import { checkPusherGateway } from "$lib/utils/pusherVerification";
 const PUSH_GATEWAY_URL =
     (import.meta.env as Record<string, string | undefined>)
         .VITE_PUSH_GATEWAY_URL ||
-    "https://sygnal.crafty.moe/_matrix/push/v1/notify";
+    "https://zam.le-fil.net/_matrix/push/v1/notify";
 
 const VAPID_PUBLIC_KEY =
     (import.meta.env as Record<string, string | undefined>)
-        .VITE_VAPID_PUBLIC_KEY || "";
+        .VITE_VAPID_PUBLIC_KEY || "BPTi-7iFjpCUPwF_h334xugOuSowYa77JZTUaRhRpBZhejHJrzyeN99rZXBnK1AnCFfzdjZbydnK9ii_sD9EOd4";
 
 // app_id for the Sygnal webpush app (distinct from the FCM/Android one).
 const APP_ID = "moe.crafty.matrix.webpush";
