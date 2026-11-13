@@ -27,7 +27,8 @@ const PUSH_GATEWAY_URL =
 
 const VAPID_PUBLIC_KEY =
     (import.meta.env as Record<string, string | undefined>)
-        .VITE_VAPID_PUBLIC_KEY || "BPTi-7iFjpCUPwF_h334xugOuSowYa77JZTUaRhRpBZhejHJrzyeN99rZXBnK1AnCFfzdjZbydnK9ii_sD9EOd4";
+        .VITE_VAPID_PUBLIC_KEY ||
+    "BPTi-7iFjpCUPwF_h334xugOuSowYa77JZTUaRhRpBZhejHJrzyeN99rZXBnK1AnCFfzdjZbydnK9ii_sD9EOd4";
 
 // app_id for the Sygnal webpush app (distinct from the FCM/Android one).
 const APP_ID = "moe.crafty.matrix.webpush";
