@@ -85,12 +85,33 @@ jobs:
         working-directory: fluffychat
         run: flutter build web --dart-define=FLUTTER_WEB_CANVASKIT_URL=canvaskit/ --release --source-maps --base-href "/"
 
+      - name: "Ajouter et verifier config.json dans le build Web"
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          config = {
+              "applicationName": "Le Fil Echo",
+              "defaultHomeserver": "matrix.org",
+          }
+          dest = Path("fluffychat/build/web/config.json")
+          if not dest.parent.is_dir():
+              raise SystemExit("Build Web introuvable")
+          dest.write_text(json.dumps(config, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+          actual = json.loads(dest.read_text(encoding="utf-8"))
+          assert actual == config, "Configuration E12 incorrecte"
+          print("config.json integre au build et valide")
+          PY
+
       - name: "Verifier la sortie sans deployer"
         shell: bash
         run: |
           set -euo pipefail
           test -s fluffychat/build/web/index.html
           test -s fluffychat/build/web/flutter_bootstrap.js
+          test -s fluffychat/build/web/config.json
           test -s fluffychat/build/web/assets/assets/logo/mini/le_fil_echo_logo.jpg
           sha256sum fluffychat/build/web/assets/assets/logo/mini/le_fil_echo_logo.jpg
           echo "Build disponible sous GitHub Actions, AUCUN deploiement."
