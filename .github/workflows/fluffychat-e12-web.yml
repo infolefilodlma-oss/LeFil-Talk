@@ -142,9 +142,11 @@ jobs:
                 {name:'desktop',viewport:{width:1280,height:900}},
                 {name:'mobile',viewport:{width:390,height:844}},
               ]) {
-                const context = await browser.newContext({viewport:device.viewport,serviceWorkers:'block'});
+                const context = await browser.newContext({viewport:device.viewport,locale:'fr-FR',serviceWorkers:'block'});
                 const page = await context.newPage();
                 const errors = [];
+                const localeInfo = await page.evaluate(() => ({language:navigator.language,languages:navigator.languages,intlLocale:Intl.DateTimeFormat().resolvedOptions().locale}));
+                console.log(device.name+': configuration navigateur '+JSON.stringify(localeInfo));
                 page.on('pageerror', e => errors.push(String(e)));
                 page.on('console', m => {if(m.type()==='error') errors.push('console: '+m.text());});
                 const response = await page.goto('http://127.0.0.1:8765/',{waitUntil:'domcontentloaded',timeout:30000});
@@ -159,7 +161,7 @@ jobs:
                   await page.screenshot({path:screenshot,fullPage:true}).catch(e=>console.error('Capture impossible:',e));
                   fs.writeFileSync('e12-test-proofs/'+device.name+'-console.json',JSON.stringify({
                     url:page.url(),title:await page.title().catch(()=>''),viewReady,
-                    errors,html:await page.locator('body').innerHTML().catch(()=>''), 
+                    localeInfo,errors,html:await page.locator('body').innerHTML().catch(()=>''), 
                   },null,2));
                 }
                 if (!viewReady) throw Error(device.name+': interface Flutter non rendue, consulter capture et journal');
