@@ -99,6 +99,7 @@ jobs:
           config = {
               "applicationName": "Le Fil Echo",
               "defaultHomeserver": "matrix.org",
+              "website": "https://fluffy.le-fil.net/",
           }
           dest = Path("fluffychat/build/web/config.json")
           if not dest.parent.is_dir():
@@ -106,6 +107,7 @@ jobs:
           dest.write_text(json.dumps(config, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
           actual = json.loads(dest.read_text(encoding="utf-8"))
           assert actual == config, "Configuration E12 incorrecte"
+          assert actual["website"] == "https://fluffy.le-fil.net/", "URL OAuth incorrecte"
           print("config.json integre au build et valide")
           PY
 
