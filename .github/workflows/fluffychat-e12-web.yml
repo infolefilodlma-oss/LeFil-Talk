@@ -2,6 +2,10 @@ name: "Le Fil Echo - E12 Web (manuel, sans deploiement)"
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'e12-run-once-20261117.txt'
 
 permissions:
   contents: read
