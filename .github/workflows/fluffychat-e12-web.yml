@@ -1,0 +1,104 @@
+name: "Le Fil Echo - E12 Web (manuel, sans deploiement)"
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lefil-echo-e12-web
+  cancel-in-progress: false
+
+jobs:
+  build-web:
+    name: "Construire E12 chez GitHub seulement"
+    runs-on: ubuntu-26.04
+    timeout-minutes: 90
+    steps:
+      - name: "Importer les personnalisations E12 existantes"
+        uses: actions/checkout@v4
+        with:
+          ref: 36aadf9f3bdcd1600654d0814e89401175f2517d
+          path: lefil-e12
+          persist-credentials: false
+
+      - name: "Verrouiller et controler les deux fichiers E12"
+        shell: bash
+        run: |
+          set -euo pipefail
+          src="lefil-e12/e12-customizations"
+          test -s "$src/lib/pages/intro/intro_page.dart"
+          test -s "$src/assets/logo/mini/le_fil_echo_logo.jpg"
+          file --mime-type "$src/assets/logo/mini/le_fil_echo_logo.jpg" | grep -Fq 'image/jpeg'
+          grep -Fq 'Comme le suggère' "$src/lib/pages/intro/intro_page.dart"
+          grep -Fq 'Pourquoi Le Fil a-t-il choisi Matrix ?' "$src/lib/pages/intro/intro_page.dart"
+          grep -Fq 'pour sa messagerie Écho' "$src/lib/pages/intro/intro_page.dart"
+          grep -Fq 'le_fil_echo_logo.jpg' "$src/lib/pages/intro/intro_page.dart"
+          grep -Fq 'onPressed: login' "$src/lib/pages/intro/intro_page.dart"
+          grep -Fq 'loginWithMatrixId' "$src/lib/pages/intro/intro_page.dart"
+          sha256sum "$src/lib/pages/intro/intro_page.dart" "$src/assets/logo/mini/le_fil_echo_logo.jpg"
+
+      - name: "Recuperer la version officielle FluffyChat 2.11.5"
+        uses: actions/checkout@v4
+        with:
+          repository: krille-chan/fluffychat
+          ref: v2.11.5
+          path: fluffychat
+          persist-credentials: false
+
+      - name: "Appliquer uniquement la page et le logo deja personnalises"
+        shell: bash
+        run: |
+          set -euo pipefail
+          src="lefil-e12/e12-customizations"
+          cp "$src/lib/pages/intro/intro_page.dart" fluffychat/lib/pages/intro/intro_page.dart
+          cp "$src/assets/logo/mini/le_fil_echo_logo.jpg" fluffychat/assets/logo/mini/le_fil_echo_logo.jpg
+          cmp "$src/lib/pages/intro/intro_page.dart" fluffychat/lib/pages/intro/intro_page.dart
+          cmp "$src/assets/logo/mini/le_fil_echo_logo.jpg" fluffychat/assets/logo/mini/le_fil_echo_logo.jpg
+          diff -u <(printf '%s\n' lib/pages/intro/intro_page.dart) <(git -C fluffychat diff --name-only) || {
+            echo "::error::Des fichiers suivis hors E12 sont modifies"; exit 1;
+          }
+          echo "Sources officielles, modifications limitees aux deux ressources E12"
+
+      - name: "Installer Flutter selon la version officielle"
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version-file: fluffychat/.fvmrc
+          cache: true
+
+      - name: "Installer Rust selon la procedure officielle"
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: "Preparer Rust Web comme dans le workflow officiel"
+        run: rustup component add rust-src --toolchain nightly-x86_64-unknown-linux-gnu
+
+      - name: "Resoudre les dependances Flutter"
+        working-directory: fluffychat
+        run: flutter pub get
+
+      - name: "Preparer le Web avec le script officiel FluffyChat"
+        working-directory: fluffychat
+        run: ./scripts/prepare-web.sh
+
+      - name: "Compiler seulement la version Web"
+        working-directory: fluffychat
+        run: flutter build web --dart-define=FLUTTER_WEB_CANVASKIT_URL=canvaskit/ --release --source-maps --base-href "/"
+
+      - name: "Verifier la sortie sans deployer"
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s fluffychat/build/web/index.html
+          test -s fluffychat/build/web/flutter_bootstrap.js
+          test -s fluffychat/build/web/assets/assets/logo/mini/le_fil_echo_logo.jpg
+          sha256sum fluffychat/build/web/assets/assets/logo/mini/le_fil_echo_logo.jpg
+          echo "Build disponible sous GitHub Actions, AUCUN deploiement."
+
+      - name: "Archiver le build pour validation ulterieure"
+        uses: actions/upload-artifact@v4
+        with:
+          name: LeFil-Echo-E12-Web-A-VALIDER
+          path: fluffychat/build/web/
+          if-no-files-found: error
+          retention-days: 14
