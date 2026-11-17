@@ -147,10 +147,20 @@ jobs:
                 page.on('console', m => {if(m.type()==='error') errors.push('console: '+m.text());});
                 const response = await page.goto('http://127.0.0.1:8765/',{waitUntil:'domcontentloaded',timeout:30000});
                 if (!response || response.status()!==200) throw Error(device.name+': HTTP incorrect');
-                await page.locator('flutter-view').first().waitFor({state:'attached',timeout:60000});
-                await page.waitForTimeout(8000);
                 const screenshot='e12-test-proofs/'+device.name+'.png';
-                await page.screenshot({path:screenshot,fullPage:true});
+                let viewReady = false;
+                try {
+                  await page.locator('flutter-view').first().waitFor({state:'attached',timeout:60000});
+                  viewReady = true;
+                  await page.waitForTimeout(8000);
+                } finally {
+                  await page.screenshot({path:screenshot,fullPage:true}).catch(e=>console.error('Capture impossible:',e));
+                  fs.writeFileSync('e12-test-proofs/'+device.name+'-console.json',JSON.stringify({
+                    url:page.url(),title:await page.title().catch(()=>''),viewReady,
+                    errors,html:await page.locator('body').innerHTML().catch(()=>''), 
+                  },null,2));
+                }
+                if (!viewReady) throw Error(device.name+': interface Flutter non rendue, consulter capture et journal');
                 if (fs.statSync(screenshot).size < 10000) throw Error(device.name+': capture anormalement petite');
                 if (errors.length) throw Error(device.name+': erreurs navigateur: '+errors.join(' | '));
                 console.log(device.name+': Flutter monte, aucune exception, capture '+screenshot);
