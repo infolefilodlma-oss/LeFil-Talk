@@ -1,0 +1,3 @@
+E12 - déclenchement unique demandé le 17 novembre 2026.
+Ce fichier sert uniquement de déclencheur pour la construction Web E12 sur runner GitHub, sans déploiement.
+Sources verrouillées sur commit 36aadf9f3bdcd1600654d0814e89401175f2517d.
